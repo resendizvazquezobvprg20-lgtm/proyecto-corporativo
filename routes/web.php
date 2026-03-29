@@ -12,9 +12,12 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Main\Principal1Controller;
 use App\Http\Controllers\Main\Principal2Controller;
 
+
+
+
 // ── Autenticación ─────────────────────────────────────────
 Route::get('/',       [LoginController::class, 'showLoginForm'])->name('login');
-// Quítale el .name('login') a la raíz si ya lo tiene la ruta /login
+// Quítale el .name('login') a la raíz si ya lo tiene la ruta /login de la cosa 
 Route::get('/',       [LoginController::class, 'showLoginForm']); 
 Route::get('/login',  [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
