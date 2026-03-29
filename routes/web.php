@@ -4,11 +4,11 @@
 // ============================================================
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Security\PerfilController;
+
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\Security\ModuloController;
 use App\Http\Controllers\Security\PermisoPerfilController;
-use App\Http\Controllers\Security\UsuarioController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Main\Principal1Controller;
 use App\Http\Controllers\Main\Principal2Controller;
 
@@ -21,9 +21,7 @@ Route::post('/logout',[LoginController::class, 'logout'])->name('logout');
 // ── Rutas protegidas (JWT) ────────────────────────────────
 Route::middleware(['jwt'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+   
     // ── Seguridad: Perfil (módulo id=1) ──────────────────
     Route::prefix('seguridad/perfil')->name('perfil.')->group(function () {
         Route::get('/',         [PerfilController::class, 'index'])->middleware('permission:1,bitConsulta')->name('index');
