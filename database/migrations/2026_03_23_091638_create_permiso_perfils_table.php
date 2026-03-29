@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('permisos_perfils', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idModulo')->constrained('modulo')->onDelete('cascade');
-            $table->foreignId('idPerfil')->constrained('perfil')->onDelete('cascade');
+            $table->foreignId('idModulo')->constrained('modulos')->onDelete('cascade');
+            $table->foreignId('idPerfil')->constrained('perfils')->onDelete('cascade');
             $table->boolean('bitAgregar')->default(false);
             $table->boolean('bitEditar')->default(false);
             $table->boolean('bitConsulta')->default(false);
@@ -24,6 +24,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('permisos_perfil');
+        Schema::dropIfExists('permisos_perfils');
     }
 };

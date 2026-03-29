@@ -10,14 +10,14 @@ return new class extends Migration
     {
         Schema::create('menu_modulos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idMenu')->constrained('menu')->onDelete('cascade');
-            $table->foreignId('idModulo')->constrained('modulo')->onDelete('cascade');
+            $table->foreignId('idMenu')->constrained('menus')->onDelete('cascade');
+            $table->foreignId('idModulo')->constrained('modulos')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('menu_modulo');
+        Schema::dropIfExists('menu_modulos');
     }
 };

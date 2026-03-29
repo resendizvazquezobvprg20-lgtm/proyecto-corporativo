@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('perfil', function (Blueprint $table) {
+        Schema::create('perfils', function (Blueprint $table) {
             $table->id();
             $table->string('strNombrePerfil', 100);
             $table->boolean('bitAdministrador')->default(false);
@@ -18,6 +18,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('perfil');
+        Schema::dropIfExists('perfils');
     }
 };
