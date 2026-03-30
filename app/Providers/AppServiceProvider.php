@@ -3,15 +3,20 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\UrlGenerator;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function boot(UrlGenerator $url): void
+    public function register(): void
     {
-        // Forzar HTTPS en producción
-        if (env('APP_ENV') === 'production') {
-            $url->forceScheme('https');
+        //
+    }
+
+    public function boot(): void
+    {
+        // Forzar HTTPS cuando está en producción (Railway)
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
         }
     }
 }

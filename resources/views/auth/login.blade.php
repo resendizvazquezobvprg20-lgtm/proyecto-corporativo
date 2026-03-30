@@ -50,7 +50,7 @@
             margin: 0 auto 12px;
             font-size: 1.8rem;
         }
-        
+
 
         .login-body { padding: 32px; }
 
@@ -135,7 +135,7 @@
             </div>
         @endif
 
-        <form action="{{ route('login.post') }}" method="POST" id="loginForm" novalidate>
+       <form action="{{ secure_url(route('login.post')) }}" method="POST" id="loginForm" novalidate>
             @csrf
 
             {{-- Usuario --}}
