@@ -11,7 +11,7 @@ use App\Http\Controllers\Security\PermisoPerfilController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Main\Principal1Controller;
 use App\Http\Controllers\Main\Principal2Controller;
-
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -24,9 +24,7 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 // ── Rutas protegidas (JWT) ────────────────────────────────
 Route::middleware(['jwt'])->group(function () {
 
-Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
    
     // ── Seguridad: Perfil (módulo id=1) ──────────────────
     Route::prefix('seguridad/perfil')->name('perfil.')->group(function () {
