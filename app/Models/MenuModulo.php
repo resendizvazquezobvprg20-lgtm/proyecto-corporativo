@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MenuModulo extends Model
 {
-    protected $table = 'menu_modulo';
+    protected $table = 'menu_modulos';
     protected $fillable = ['idMenu', 'idModulo'];
  
     public function menu()

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EstadoUsuario extends Model
 {
-    protected $table = 'estado_usuario';
+    protected $table = 'estado_usuarios';
     public $timestamps = false;
     protected $fillable = ['strNombre'];
 }

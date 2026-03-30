@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Perfil extends Model
 {
-    protected $table = 'perfil';
+    protected $table = 'perfils';
     protected $fillable = ['strNombrePerfil', 'bitAdministrador'];
  
     public function usuarios()

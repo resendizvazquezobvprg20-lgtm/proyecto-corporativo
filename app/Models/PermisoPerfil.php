@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PermisoPerfil extends Model
 {
-    protected $table = 'permisos_perfil';
+    protected $table = 'permisos_perfils';
     protected $fillable = [
         'idModulo', 'idPerfil',
         'bitAgregar', 'bitEditar', 'bitConsulta', 'bitEliminar', 'bitDetalle'
