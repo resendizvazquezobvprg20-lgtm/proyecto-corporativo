@@ -30,7 +30,9 @@ class JwtMiddleware
 
             if ($user->idEstadoUsuario != 1) {
                 JWTAuth::invalidate();
-                return redirect()->route('login')->with('cookie', \Cookie::forget('jwt_token'))->with('error', 'Cuenta desactivada.');
+               return redirect()->route('login')
+    ->withCookie(\Cookie::forget('jwt_token'))
+    ->with('error', 'Cuenta desactivada.');
             }
 
         } catch (TokenExpiredException $e) {

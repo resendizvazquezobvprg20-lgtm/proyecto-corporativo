@@ -33,7 +33,7 @@ class ModuloController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'strNombreModulo' => 'required|string|max:100|unique:modulo,strNombreModulo',
+            'strNombreModulo' => 'required|string|max:100|unique:modulos,strNombreModulo',
         ], [
             'strNombreModulo.required' => 'El nombre del módulo es obligatorio.',
             'strNombreModulo.unique'   => 'Ya existe un módulo con ese nombre.',
@@ -53,7 +53,7 @@ class ModuloController extends Controller
     {
         $modulo    = Modulo::findOrFail($id);
         $validated = $request->validate([
-            'strNombreModulo' => 'required|string|max:100|unique:modulo,strNombreModulo,' . $id,
+            'strNombreModulo' => 'required|string|max:100|unique:modulos,strNombreModulo,' . $id,
         ]);
         $modulo->update($validated);
         return response()->json(['success' => true, 'message' => 'Módulo actualizado.', 'data' => $modulo]);

@@ -40,8 +40,8 @@ class PermisoPerfilController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'idPerfil'    => 'required|exists:perfil,id',
-            'idModulo'    => 'required|exists:modulo,id',
+            'idPerfil'    => 'required|exists:perfils,id',   // ✅ perfils
+            'idModulo'    => 'required|exists:modulos,id',   // ✅ modulos
             'bitAgregar'  => 'boolean',
             'bitEditar'   => 'boolean',
             'bitConsulta' => 'boolean',
