@@ -50,6 +50,7 @@
             margin: 0 auto 12px;
             font-size: 1.8rem;
         }
+        
 
         .login-body { padding: 32px; }
 
