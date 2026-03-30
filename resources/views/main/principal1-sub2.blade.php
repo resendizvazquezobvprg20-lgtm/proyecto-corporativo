@@ -15,7 +15,7 @@
         : (PermisoPerfil::where('idPerfil',$um->idPerfil)->where('idModulo',6)->first()?->toArray() ?? []);
 @endphp
 
-<div class="card">
+<div class="card ">
     <div class="card-header"><i class="bi bi-grid me-2"></i>Principal 1 — Sub 2</div>
     <div class="card-body">
         <div class="mb-3 d-flex gap-2 flex-wrap">
