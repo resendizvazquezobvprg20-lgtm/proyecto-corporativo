@@ -24,6 +24,9 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 // ── Rutas protegidas (JWT) ────────────────────────────────
 Route::middleware(['jwt'])->group(function () {
 
+Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
    
     // ── Seguridad: Perfil (módulo id=1) ──────────────────
     Route::prefix('seguridad/perfil')->name('perfil.')->group(function () {
