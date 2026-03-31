@@ -14,7 +14,7 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         try {
-            if (JWTAuth::parseToken()->authenticate()) {
+            if (JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate()) {
                 return redirect()->route('dashboard');
             }
         } catch (\Exception $e) {
@@ -71,19 +71,21 @@ class LoginController extends Controller
         }
 
         // 6. REDIRECCIÓN CON COOKIE SEGURA
-        $isProduction = config('app.env') === 'production';
-        Log::info('[LOGIN] Redirigiendo al dashboard', ['is_prod' => $isProduction]);
+        // Railway usa HTTPS en producción pero Laravel lo detecta como HTTP detrás del proxy.
+        // Con trustProxies configurado en bootstrap/app.php, request()->secure() ya devuelve
+        // true correctamente. Usamos SameSite=Lax para compatibilidad máxima.
+        Log::info('[LOGIN] Redirigiendo al dashboard');
 
         return redirect()->route('dashboard')
             ->cookie(
-                'jwt_token', 
-                $token, 
-                config('jwt.ttl', 60), 
-                '/', 
-                null, 
-                $isProduction, 
-                true, 
-                false, 
+                'jwt_token',
+                $token,
+                config('jwt.ttl', 60),
+                '/',
+                null,
+                true,   // secure: siempre true (Railway siempre es HTTPS)
+                true,   // httpOnly
+                false,
                 'Lax'
             );
     }
@@ -91,10 +93,8 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         try {
-            if (!$request->bearerToken() && $request->cookie('jwt_token')) {
-                JWTAuth::setToken($request->cookie('jwt_token'));
-            }
-            JWTAuth::parseToken()->invalidate();
+            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
+            if ($token) JWTAuth::setToken($token)->invalidate();
         } catch (\Exception $e) { }
 
         return redirect()->route('login')

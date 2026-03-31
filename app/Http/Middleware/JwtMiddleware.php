@@ -13,34 +13,45 @@ class JwtMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // 1. EXTRAER EL TOKEN DE LA COOKIE SI NO VIENE EN EL HEADER
-        if (!$request->bearerToken() && $request->cookie('jwt_token')) {
-            $token = $request->cookie('jwt_token');
-            // Le decimos a JWTAuth que use este token específicamente
-            JWTAuth::setToken($token);
-        }
-
         try {
-            // 2. Intentar autenticar
-            $user = JWTAuth::parseToken()->authenticate();
+            // 1. Intentar obtener token del header Bearer primero
+            $token = $request->bearerToken();
+
+            // 2. Si no hay header, leer de la cookie (httpOnly — sólo accesible server-side)
+            //    encryptCookiesExcept(['jwt_token']) en bootstrap/app.php asegura que
+            //    el valor que leemos aquí es el JWT crudo, no cifrado por Laravel.
+            if (!$token) {
+                $token = $request->cookie('jwt_token');
+            }
+
+            if (!$token) {
+                return redirect()->route('login')->with('error', 'No autenticado.');
+            }
+
+            // 3. Autenticar con el token obtenido
+            $user = JWTAuth::setToken($token)->authenticate();
 
             if (!$user) {
                 return redirect()->route('login')->with('error', 'Sesión inválida.');
             }
 
+            // 4. Verificar estado activo
             if ($user->idEstadoUsuario != 1) {
                 JWTAuth::invalidate();
-               return redirect()->route('login')
-    ->withCookie(\Cookie::forget('jwt_token'))
-    ->with('error', 'Cuenta desactivada.');
+                return redirect()->route('login')
+                    ->withCookie(\Cookie::forget('jwt_token'))
+                    ->with('error', 'Cuenta desactivada.');
             }
 
         } catch (TokenExpiredException $e) {
-            return redirect()->route('login')->with('error', 'Sesión expirada.');
+            return redirect()->route('login')
+                ->withCookie(\Cookie::forget('jwt_token'))
+                ->with('error', 'Sesión expirada. Inicia sesión nuevamente.');
         } catch (TokenInvalidException $e) {
-            return redirect()->route('login')->with('error', 'Token inválido.');
+            return redirect()->route('login')
+                ->withCookie(\Cookie::forget('jwt_token'))
+                ->with('error', 'Token inválido.');
         } catch (Exception $e) {
-            // Si llegas aquí, es porque no encontró el token ni en Header ni en Cookie
             return redirect()->route('login')->with('error', 'No autenticado.');
         }
 

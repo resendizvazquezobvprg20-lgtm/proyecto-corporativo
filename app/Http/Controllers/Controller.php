@@ -14,7 +14,7 @@ abstract class Controller
 protected function getPermisos(int $idModulo): array
 {
     try {
-        $user    = JWTAuth::parseToken()->authenticate();
+        $user    = JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate();
         $usuario = Usuario::with('perfil')->find($user->id);
         $esAdmin = $usuario?->perfil?->bitAdministrador ?? false;
         if ($esAdmin) return array_fill_keys(['bitAgregar','bitEditar','bitEliminar','bitConsulta','bitDetalle'], true);

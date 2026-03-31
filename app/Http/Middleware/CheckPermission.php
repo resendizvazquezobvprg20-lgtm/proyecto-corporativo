@@ -1,11 +1,4 @@
 <?php
-// ============================================================
-// ARCHIVO: app/Http/Middleware/CheckPermission.php
-// ============================================================
-// NOTA: El alias en web.php es 'permission', NO 'check.permission'
-// Asegúrate de que en bootstrap/app.php o Kernel.php esté:
-//   'permission' => \App\Http\Middleware\CheckPermission::class,
-// ============================================================
 
 namespace App\Http\Middleware;
 
@@ -19,26 +12,26 @@ class CheckPermission
 {
     /**
      * Verifica que el usuario tenga el permiso requerido para el módulo.
-     *
-     * Uso en rutas: ->middleware('permission:ID_MODULO,CAMPO_PERMISO')
-     * Ejemplo:      ->middleware('permission:1,bitConsulta')
+     * Uso: ->middleware('permission:ID_MODULO,CAMPO_PERMISO')
      */
     public function handle(Request $request, Closure $next, $idModulo, $accion = 'bitConsulta')
     {
         try {
-            // Intentar obtener el token desde cookie si no viene en el header
-            if (!$request->bearerToken() && $request->cookie('jwt_token')) {
-                JWTAuth::setToken($request->cookie('jwt_token'));
+            // Obtener token desde header o cookie
+            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
+
+            if (!$token) {
+                return $this->redirectOrJson($request, 'No autenticado.');
             }
 
-            $user    = JWTAuth::parseToken()->authenticate();
+            $user    = JWTAuth::setToken($token)->authenticate();
             $usuario = Usuario::with('perfil')->find($user->id);
 
             if (!$usuario) {
                 return $this->redirectOrJson($request, 'Usuario no encontrado.');
             }
 
-            // Los administradores tienen acceso total
+            // Administradores tienen acceso total
             if ($usuario->perfil?->bitAdministrador) {
                 return $next($request);
             }
@@ -49,15 +42,11 @@ class CheckPermission
                 ->first();
 
             if (!$permiso || !$permiso->$accion) {
-                return $this->redirectOrJson(
-                    $request,
-                    'No tienes permiso para realizar esta acción.',
-                    403
-                );
+                return $this->redirectOrJson($request, 'No tienes permiso para esta acción.', 403);
             }
 
         } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-            return $this->redirectOrJson($request, 'Sesión expirada. Inicia sesión nuevamente.');
+            return $this->redirectOrJson($request, 'Sesión expirada.');
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return $this->redirectOrJson($request, 'Token inválido.');
         } catch (\Exception $e) {
@@ -72,8 +61,6 @@ class CheckPermission
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json(['error' => $message], $code);
         }
-
-        $flashKey = $code === 403 ? 'error' : 'error';
-        return redirect()->route('login')->with($flashKey, $message);
+        return redirect()->route('login')->with('error', $message);
     }
 }

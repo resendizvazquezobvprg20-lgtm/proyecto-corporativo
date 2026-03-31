@@ -80,7 +80,7 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            $jwtUser         = JWTAuth::parseToken()->authenticate();
+            $jwtUser         = JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate();
             $usuario         = Usuario::with('perfil')->find($jwtUser->id);
             $esAdmin         = $usuario?->perfil?->bitAdministrador ?? false;
             $menus           = self::buildMenu($usuario->idPerfil, $esAdmin);

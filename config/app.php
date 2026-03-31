@@ -124,6 +124,8 @@ return [
     ],
 
 
+    
+
     'aliases' => [
     'NoCaptcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
 ],
