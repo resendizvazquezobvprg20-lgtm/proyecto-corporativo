@@ -16,6 +16,6 @@ class Menu extends Model
  
     public function modulos()
     {
-        return $this->belongsToMany(Modulo::class, 'menu_modulo', 'idMenu', 'idModulo');
+       return $this->belongsToMany(Modulo::class, 'menu_modulos', 'idMenu', 'idModulo');
     }
 }
