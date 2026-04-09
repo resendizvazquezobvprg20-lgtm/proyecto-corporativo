@@ -87,3 +87,27 @@ Route::middleware(['jwt'])->group(function () {
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
+// ── RUTA DE DIAGNÓSTICO TEMPORAL (eliminar después de resolver el problema) ──
+Route::get('/debug-jwt', function (\Illuminate\Http\Request $request) {
+    $info = [
+        'jwt_secret_len'    => strlen(config('jwt.secret', '')),
+        'jwt_secret_first8' => substr(config('jwt.secret', ''), 0, 8),
+        'app_env'           => config('app.env'),
+        'app_debug'         => config('app.debug'),
+        'cookie_names'      => array_keys($request->cookies->all()),
+        'has_jwt_cookie'    => $request->hasCookie('jwt_token'),
+        'jwt_cookie_len'    => strlen($request->cookie('jwt_token', '')),
+    ];
+
+    if ($request->hasCookie('jwt_token')) {
+        try {
+            $token = $request->cookie('jwt_token');
+            $user  = \Tymon\JWTAuth\Facades\JWTAuth::setToken($token)->authenticate();
+            $info['auth_result'] = $user ? 'OK: ' . $user->strNombreUsuario : 'null';
+        } catch (\Exception $e) {
+            $info['auth_error'] = get_class($e) . ': ' . $e->getMessage();
+        }
+    }
+
+    return response()->json($info);
+});

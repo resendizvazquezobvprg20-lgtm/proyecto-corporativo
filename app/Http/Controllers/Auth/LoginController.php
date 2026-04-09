@@ -13,21 +13,16 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        try {
-            if (JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate()) {
-                return redirect()->route('dashboard');
-            }
-        } catch (\Exception $e) {
-            // Sin token válido
-        }
+        // NO intentar leer el token aquí.
+        // Si el usuario ya está autenticado y navega a /login,
+        // simplemente mostramos el formulario — no hay riesgo de loop.
         return view('auth.login');
     }
 
     public function login(Request $request)
     {
-        Log::info('[LOGIN] Iniciando intento de login', ['user' => $request->strNombreUsuario]);
+        Log::info('[LOGIN] Inicio para: ' . $request->strNombreUsuario);
 
-        // 1. VALIDACIÓN (Incluye Captcha)
         $request->validate([
             'strNombreUsuario'     => 'required|string',
             'strPwd'               => 'required|string',
@@ -39,61 +34,37 @@ class LoginController extends Controller
             'g-recaptcha-response.captcha'  => 'Captcha incorrecto. Inténtalo de nuevo.',
         ]);
 
-        Log::info('[LOGIN] Step 1 OK - Validación y Captcha pasados');
-
-        // 2. BUSCAR USUARIO
         $usuario = Usuario::where('strNombreUsuario', $request->strNombreUsuario)->first();
 
-        if (!$usuario) {
-            Log::warning('[LOGIN] Usuario no encontrado');
+        if (!$usuario || !Hash::check($request->strPwd, $usuario->strPwd)) {
+            Log::warning('[LOGIN] Credenciales inválidas');
             return back()->withErrors(['login' => 'Usuario o contraseña incorrectos.'])->withInput();
         }
 
-        // 3. VERIFICAR CONTRASEÑA
-        if (!Hash::check($request->strPwd, $usuario->strPwd)) {
-            Log::warning('[LOGIN] Contraseña incorrecta');
-            return back()->withErrors(['login' => 'Usuario o contraseña incorrectos.'])->withInput();
-        }
-
-        // 4. VERIFICAR ESTADO
         if ($usuario->idEstadoUsuario != 1) {
-            Log::warning('[LOGIN] Usuario inactivo');
             return back()->withErrors(['login' => 'El usuario no existe o su estado es inactivo.']);
         }
 
-        // 5. GENERAR TOKEN
         try {
             $token = JWTAuth::fromUser($usuario);
-            Log::info('[LOGIN] Step 5 OK - JWT generado');
+            Log::info('[LOGIN] Token OK, len=' . strlen($token));
         } catch (\Exception $e) {
-            Log::error('[LOGIN] ERROR JWT', ['msg' => $e->getMessage()]);
+            Log::error('[LOGIN] JWT error: ' . $e->getMessage());
             return back()->withErrors(['login' => 'Error interno de autenticación.']);
         }
 
-        // 6. REDIRECCIÓN CON COOKIE SEGURA
-        // Railway usa HTTPS en producción pero Laravel lo detecta como HTTP detrás del proxy.
-        // Con trustProxies configurado en bootstrap/app.php, request()->secure() ya devuelve
-        // true correctamente. Usamos SameSite=Lax para compatibilidad máxima.
-        Log::info('[LOGIN] Redirigiendo al dashboard');
+        $ttl = config('jwt.ttl', 60);
 
+        // secure:false → Railway termina SSL en el proxy externo,
+        // el PHP ve HTTP interno → el browser no enviaría una cookie secure.
         return redirect()->route('dashboard')
-            ->cookie(
-                'jwt_token',
-                $token,
-                config('jwt.ttl', 60),
-                '/',
-                null,
-                true,   // secure: siempre true (Railway siempre es HTTPS)
-                true,   // httpOnly
-                false,
-                'Lax'
-            );
+            ->cookie('jwt_token', $token, $ttl, '/', null, false, true, false, 'Lax');
     }
 
     public function logout(Request $request)
     {
         try {
-            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
+            $token = $request->cookie('jwt_token');
             if ($token) JWTAuth::setToken($token)->invalidate();
         } catch (\Exception $e) { }
 
