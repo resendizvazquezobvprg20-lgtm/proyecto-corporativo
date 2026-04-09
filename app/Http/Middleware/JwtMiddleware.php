@@ -15,7 +15,8 @@ class JwtMiddleware
     public function handle(Request $request, Closure $next)
     {
         try {
-            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
+           $rawCookie = $_COOKIE['jwt_token'] ?? null;  // Lee cookie RAW sin pasar por Laravel
+$token = $request->bearerToken() ?? $rawCookie;
 
             if (!$token) {
                 Log::warning('[JWT-MW] Sin token en header ni cookie. Cookies: ' . implode(', ', array_keys($request->cookies->all())));
