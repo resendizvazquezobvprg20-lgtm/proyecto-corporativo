@@ -17,8 +17,8 @@ class CheckPermission
     public function handle(Request $request, Closure $next, $idModulo, $accion = 'bitConsulta')
     {
         try {
-           $rawCookie = $_COOKIE['jwt_token'] ?? null;
-$token = $request->bearerToken() ?? $rawCookie;
+            // Obtener token desde header o cookie
+            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
 
             if (!$token) {
                 return $this->redirectOrJson($request, 'No autenticado.');
