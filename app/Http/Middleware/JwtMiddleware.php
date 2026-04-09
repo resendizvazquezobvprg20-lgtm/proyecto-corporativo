@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
@@ -14,45 +13,51 @@ class JwtMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        try {
-            $token = $request->bearerToken() ?? $request->cookie('jwt_token');
+        // El token viene en el header Authorization: Bearer <token>
+        // igual que en el proyecto Rust - localStorage + fetch con header
+        $token = $request->bearerToken();
 
-            if (!$token) {
-                Log::warning('[JWT-MW] Sin token en header ni cookie. Cookies: ' . implode(', ', array_keys($request->cookies->all())));
-                return redirect()->route('login')->with('error', 'No autenticado.');
+        if (!$token) {
+            // Si es petición AJAX/JSON → 401
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['error' => 'No autenticado.'], 401);
             }
+            // Si es navegación normal → mostrar login (JS redirigirá)
+            return redirect()->route('login');
+        }
 
-            Log::info('[JWT-MW] Token encontrado, len=' . strlen($token) . ', primeros20=' . substr($token, 0, 20));
-
+        try {
             $user = JWTAuth::setToken($token)->authenticate();
 
             if (!$user) {
-                Log::warning('[JWT-MW] authenticate() devolvió null');
-                return redirect()->route('login')->with('error', 'Sesión inválida.');
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['error' => 'Sesión inválida.'], 401);
+                }
+                return redirect()->route('login');
             }
 
             if ($user->idEstadoUsuario != 1) {
-                JWTAuth::invalidate();
-                return redirect()->route('login')
-                    ->withCookie(\Cookie::forget('jwt_token'))
-                    ->with('error', 'Cuenta desactivada.');
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['error' => 'Cuenta desactivada.'], 403);
+                }
+                return redirect()->route('login');
             }
 
-            Log::info('[JWT-MW] Auth OK: ' . $user->strNombreUsuario);
-
         } catch (TokenExpiredException $e) {
-            Log::warning('[JWT-MW] TokenExpired');
-            return redirect()->route('login')
-                ->withCookie(\Cookie::forget('jwt_token'))
-                ->with('error', 'Sesión expirada. Inicia sesión nuevamente.');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Sesión expirada.'], 401);
+            }
+            return redirect()->route('login');
         } catch (TokenInvalidException $e) {
-            Log::warning('[JWT-MW] TokenInvalid: ' . $e->getMessage());
-            return redirect()->route('login')
-                ->withCookie(\Cookie::forget('jwt_token'))
-                ->with('error', 'Token inválido.');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Token inválido.'], 401);
+            }
+            return redirect()->route('login');
         } catch (Exception $e) {
-            Log::error('[JWT-MW] Exception: ' . get_class($e) . ': ' . $e->getMessage());
-            return redirect()->route('login')->with('error', 'No autenticado.');
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['error' => 'No autenticado.'], 401);
+            }
+            return redirect()->route('login');
         }
 
         return $next($request);

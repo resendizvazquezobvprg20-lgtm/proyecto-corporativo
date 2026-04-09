@@ -5,24 +5,20 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\Usuario;
 
 class LoginController extends Controller
 {
+    // Muestra el formulario de login (puro HTML, sin verificar token)
     public function showLoginForm()
     {
-        // NO intentar leer el token aquí.
-        // Si el usuario ya está autenticado y navega a /login,
-        // simplemente mostramos el formulario — no hay riesgo de loop.
         return view('auth.login');
     }
 
+    // API JSON: recibe credenciales, devuelve token
     public function login(Request $request)
     {
-        Log::info('[LOGIN] Inicio para: ' . $request->strNombreUsuario);
-
         $request->validate([
             'strNombreUsuario'     => 'required|string',
             'strPwd'               => 'required|string',
@@ -31,45 +27,38 @@ class LoginController extends Controller
             'strNombreUsuario.required'     => 'El nombre de usuario es obligatorio.',
             'strPwd.required'               => 'La contraseña es obligatoria.',
             'g-recaptcha-response.required' => 'Debes completar el captcha.',
-            'g-recaptcha-response.captcha'  => 'Captcha incorrecto. Inténtalo de nuevo.',
+            'g-recaptcha-response.captcha'  => 'Captcha incorrecto.',
         ]);
 
-        $usuario = Usuario::where('strNombreUsuario', $request->strNombreUsuario)->first();
+        $usuario = Usuario::with('perfil')
+            ->where('strNombreUsuario', $request->strNombreUsuario)
+            ->first();
 
         if (!$usuario || !Hash::check($request->strPwd, $usuario->strPwd)) {
-            Log::warning('[LOGIN] Credenciales inválidas');
-            return back()->withErrors(['login' => 'Usuario o contraseña incorrectos.'])->withInput();
+            return response()->json(['error' => 'Usuario o contraseña incorrectos.'], 401);
         }
 
         if ($usuario->idEstadoUsuario != 1) {
-            return back()->withErrors(['login' => 'El usuario no existe o su estado es inactivo.']);
+            return response()->json(['error' => 'El usuario no existe o su estado es inactivo.'], 403);
         }
 
         try {
             $token = JWTAuth::fromUser($usuario);
-            Log::info('[LOGIN] Token OK, len=' . strlen($token));
         } catch (\Exception $e) {
-            Log::error('[LOGIN] JWT error: ' . $e->getMessage());
-            return back()->withErrors(['login' => 'Error interno de autenticación.']);
+            return response()->json(['error' => 'Error interno de autenticación.'], 500);
         }
 
-        $ttl = config('jwt.ttl', 60);
-
-        // secure:false → Railway termina SSL en el proxy externo,
-        // el PHP ve HTTP interno → el browser no enviaría una cookie secure.
-        return redirect()->route('dashboard')
-            ->cookie('jwt_token', $token, $ttl, '/', null, false, true, false, 'Lax');
+        return response()->json([
+            'token'      => $token,
+            'nombre'     => $usuario->strNombreUsuario,
+            'perfil_id'  => $usuario->idPerfil,
+            'imagen'     => $usuario->strImagen,
+        ]);
     }
 
-    public function logout(Request $request)
+    // Logout: solo redirige a login (el token se borra en localStorage desde JS)
+    public function logout()
     {
-        try {
-            $token = $request->cookie('jwt_token');
-            if ($token) JWTAuth::setToken($token)->invalidate();
-        } catch (\Exception $e) { }
-
-        return redirect()->route('login')
-            ->withCookie(\Cookie::forget('jwt_token'))
-            ->with('success', 'Sesión cerrada correctamente.');
+        return redirect()->route('login');
     }
 }
