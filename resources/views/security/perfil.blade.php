@@ -21,40 +21,17 @@
 @section('content')
 
 {{-- Permisos del usuario para este módulo (inyectados desde blade) --}}
-@php
-    use Tymon\JWTAuth\Facades\JWTAuth;
-    use App\Models\{PermisoPerfil, Usuario};
-
-    try {
-        $currentUser  = JWTAuth::parseToken()->authenticate();
-        $currentModel = Usuario::with('perfil')->find($currentUser->id);
-        $esAdmin      = $currentModel?->perfil?->bitAdministrador ?? false;
-    } catch (\Exception $e) {
-        $currentModel = null;
-        $esAdmin      = false;
-    }
-
-    $permisos = $esAdmin
-        ? ['bitAgregar'=>true,'bitEditar'=>true,'bitEliminar'=>true,'bitConsulta'=>true,'bitDetalle'=>true]
-        : ($currentModel
-            ? (PermisoPerfil::where('idPerfil', $currentModel->idPerfil)->where('idModulo', 1)->first()?->toArray() ?? [])
-            : []);
-@endphp
-
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-people me-2"></i>Perfiles del Sistema</span>
-        @if(!empty($permisos['bitAgregar']))
-        <button class="btn btn-sm btn-light fw-semibold" onclick="UI.openModal('create')">
+        <button class="btn btn-sm btn-light fw-semibold d-none" id="btnNuevoPerfil" onclick="UI.openModal('create')">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Perfil
         </button>
-        @endif
     </div>
 
     <div class="card-body">
         {{-- Buscador --}}
-        @if(!empty($permisos['bitConsulta']))
-        <div class="row mb-3">
+        <div class="row mb-3" id="searchBox">
             <div class="col-md-4">
                 <div class="input-group">
                     <input type="text" id="searchInput" class="form-control form-control-sm"
@@ -65,7 +42,6 @@
                 </div>
             </div>
         </div>
-        @endif
 
         {{-- Tabla --}}
         <div class="table-responsive">
@@ -155,8 +131,25 @@
 const State = {
     currentPage: 1,
     editingId:   null,
-    permisos: @json($permisos),
+    permisos: { bitAgregar: false, bitEditar: false, bitEliminar: false, bitConsulta: false, bitDetalle: false },
 };
+
+// Cargar permisos del módulo Perfil (id=1) desde /api/menu
+(async () => {
+    try {
+        const res   = await apiFetch('/api/menu');
+        if (!res || !res.ok) return;
+        const menus = await res.json();
+        for (const menu of menus) {
+            const sub = menu.submenus.find(s => s.id === 1);
+            if (sub) { State.permisos = sub; break; }
+        }
+    } catch(e) {}
+    // Mostrar/ocultar botón Nuevo según permiso
+    if (State.permisos.bitAgregar) document.getElementById('btnNuevoPerfil')?.classList.remove('d-none');
+    // Cargar tabla
+    Table.load(1);
+})();
 
 // ── Tabla + Paginación ────────────────────────────────────
 const Table = {
@@ -400,14 +393,6 @@ function debounceSearch() {
     searchTimer = setTimeout(() => Table.load(1), 400);
 }
 
-// ── Init ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    if (State.permisos.bitConsulta) {
-        Table.load(1);
-    } else {
-        document.getElementById('tableBody').innerHTML =
-            '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-lock me-2"></i>Sin permisos de consulta.</td></tr>';
-    }
-});
+// ── Init: la tabla se carga desde el IIFE de permisos arriba ──────────
 </script>
 @endpush

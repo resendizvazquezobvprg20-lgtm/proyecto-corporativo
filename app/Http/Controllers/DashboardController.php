@@ -10,7 +10,6 @@ use App\Models\PermisoPerfil;
 
 class DashboardController extends Controller
 {
-    // Mapa de id de módulo → ruta URL
     private static array $rutasModulo = [
         1 => '/seguridad/perfil',
         2 => '/seguridad/modulo',
@@ -22,10 +21,6 @@ class DashboardController extends Controller
         8 => '/principal2/sub2',
     ];
 
-    /**
-     * Construye el menú dinámico basado en los permisos del perfil del usuario.
-     * Solo muestra menús/submenús donde el usuario tiene AL MENOS una acción activa.
-     */
     public static function buildMenu(int $idPerfil, bool $esAdmin): array
     {
         $menus  = Menu::with(['modulos'])->orderBy('intOrden')->get();
@@ -38,7 +33,6 @@ class DashboardController extends Controller
                 $ruta = self::$rutasModulo[$modulo->id] ?? '#';
 
                 if ($esAdmin) {
-                    // Administrador ve todo
                     $submenus[] = [
                         'id'          => $modulo->id,
                         'nombre'      => $modulo->strNombreModulo,
@@ -54,7 +48,6 @@ class DashboardController extends Controller
                         ->where('idModulo', $modulo->id)
                         ->first();
 
-                    // Solo incluir si tiene al menos una acción activa
                     if ($permiso && (
                         $permiso->bitAgregar  ||
                         $permiso->bitEditar   ||
@@ -76,7 +69,6 @@ class DashboardController extends Controller
                 }
             }
 
-            // Solo agregar el menú padre si tiene al menos un submódulo visible
             if (!empty($submenus)) {
                 $result[] = [
                     'id'       => $menu->id,
@@ -91,8 +83,8 @@ class DashboardController extends Controller
     }
 
     /**
-     * API: devuelve el menú en JSON para el sidebar dinámico.
-     * Protegida por middleware jwt (requiere Bearer token).
+     * API JSON — protegida por middleware jwt.
+     * El JS del sidebar llama esto con Bearer token en el header.
      */
     public function menuJson()
     {
@@ -108,22 +100,13 @@ class DashboardController extends Controller
     }
 
     /**
-     * Muestra el dashboard principal
+     * Vista del dashboard — NO valida JWT en servidor.
+     * La autenticación la maneja el JS del layout (localStorage + /api/menu).
+     * Si el token es inválido, el JS redirige al login automáticamente.
      */
     public function index()
     {
-        try {
-            $jwtUser = JWTAuth::parseToken()->authenticate();
-            $usuario = Usuario::with('perfil')->find($jwtUser->id);
-            $esAdmin = $usuario?->perfil?->bitAdministrador ?? false;
-            $menus   = self::buildMenu($usuario->idPerfil, $esAdmin);
-        } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Sesión inválida.');
-        }
-
         return view('dashboard', [
-            'usuario'     => $usuario,
-            'menus'       => $menus,
             'breadcrumbs' => [
                 ['label' => 'Inicio', 'url' => null],
             ],

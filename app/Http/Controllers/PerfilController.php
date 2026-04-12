@@ -3,31 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Perfil;
-use App\Models\PermisoPerfil;
-use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PerfilController extends Controller
 {
+    /**
+     * Vista — sin validación JWT en servidor.
+     * El JS verifica el token y carga los permisos vía /api/menu.
+     */
     public function index()
     {
-        try {
-            $cu      = JWTAuth::parseToken()->authenticate();
-            $um      = Usuario::with('perfil')->find($cu->id);
-            $esAdmin = $um?->perfil?->bitAdministrador ?? false;
-        } catch (\Exception $e) {
-            $um = null; $esAdmin = false;
-        }
-
-        $permisos = $esAdmin
-            ? ['bitAgregar'=>true,'bitEditar'=>true,'bitEliminar'=>true,'bitConsulta'=>true,'bitDetalle'=>true]
-            : ($um
-                ? (PermisoPerfil::where('idPerfil', $um->idPerfil)->where('idModulo', 1)->first()?->toArray() ?? [])
-                : []);
-
         return view('security.perfil', [
-            'permisos'    => $permisos,
             'breadcrumbs' => [
                 ['label' => 'Inicio',    'url' => route('dashboard')],
                 ['label' => 'Seguridad', 'url' => '#'],

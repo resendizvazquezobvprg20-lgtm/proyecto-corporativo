@@ -15,22 +15,7 @@ class UsuarioController extends Controller
 {
     public function index()
     {
-        try {
-            $cu      = JWTAuth::parseToken()->authenticate();
-            $um      = Usuario::with('perfil')->find($cu->id);
-            $esAdmin = $um?->perfil?->bitAdministrador ?? false;
-        } catch (\Exception $e) {
-            $um = null; $esAdmin = false;
-        }
-
-        $permisos = $esAdmin
-            ? ['bitAgregar'=>true,'bitEditar'=>true,'bitEliminar'=>true,'bitConsulta'=>true,'bitDetalle'=>true]
-            : ($um
-                ? (PermisoPerfil::where('idPerfil', $um->idPerfil)->where('idModulo', 4)->first()?->toArray() ?? [])
-                : []);
-
         return view('security.usuario', [
-            'permisos'    => $permisos,
             'perfiles'    => Perfil::orderBy('strNombrePerfil')->get(),
             'estados'     => EstadoUsuario::orderBy('id')->get(),
             'breadcrumbs' => [
