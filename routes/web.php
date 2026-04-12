@@ -35,32 +35,32 @@ Route::middleware(['jwt'])->prefix('api')->group(function () {
     Route::get('/menu', [DashboardController::class, 'menuJson']);
 
     // Perfil CRUD
-    Route::get('/perfil',       [PerfilController::class, 'list']);
-    Route::post('/perfil',      [PerfilController::class, 'store']);
-    Route::get('/perfil/{id}',  [PerfilController::class, 'show']);
-    Route::put('/perfil/{id}',  [PerfilController::class, 'update']);
-    Route::delete('/perfil/{id}', [PerfilController::class, 'destroy']);
+    Route::get('/perfil',         [PerfilController::class, 'list'])   ->name('perfil.list');
+    Route::post('/perfil',        [PerfilController::class, 'store'])  ->name('perfil.store');
+    Route::get('/perfil/{id}',    [PerfilController::class, 'show'])   ->name('perfil.show');
+    Route::put('/perfil/{id}',    [PerfilController::class, 'update']) ->name('perfil.update');
+    Route::delete('/perfil/{id}', [PerfilController::class, 'destroy'])->name('perfil.destroy');
 
     // Módulo CRUD
-    Route::get('/modulo',         [ModuloController::class, 'list']);
-    Route::post('/modulo',        [ModuloController::class, 'store']);
-    Route::get('/modulo/{id}',    [ModuloController::class, 'show']);
-    Route::put('/modulo/{id}',    [ModuloController::class, 'update']);
-    Route::delete('/modulo/{id}', [ModuloController::class, 'destroy']);
+    Route::get('/modulo',         [ModuloController::class, 'list'])   ->name('modulo.list');
+    Route::post('/modulo',        [ModuloController::class, 'store'])  ->name('modulo.store');
+    Route::get('/modulo/{id}',    [ModuloController::class, 'show'])   ->name('modulo.show');
+    Route::put('/modulo/{id}',    [ModuloController::class, 'update']) ->name('modulo.update');
+    Route::delete('/modulo/{id}', [ModuloController::class, 'destroy'])->name('modulo.destroy');
 
     // Permisos Perfil
-    Route::get('/permiso',         [PermisoPerfilController::class, 'list']);
-    Route::post('/permiso',        [PermisoPerfilController::class, 'store']);
-    Route::get('/permiso/{id}',    [PermisoPerfilController::class, 'show']);
-    Route::put('/permiso/{id}',    [PermisoPerfilController::class, 'update']);
-    Route::delete('/permiso/{id}', [PermisoPerfilController::class, 'destroy']);
+    Route::get('/permiso',         [PermisoPerfilController::class, 'list'])   ->name('permiso.list');
+    Route::post('/permiso',        [PermisoPerfilController::class, 'store'])  ->name('permiso.store');
+    Route::get('/permiso/{id}',    [PermisoPerfilController::class, 'show'])   ->name('permiso.show');
+    Route::put('/permiso/{id}',    [PermisoPerfilController::class, 'update']) ->name('permiso.update');
+    Route::delete('/permiso/{id}', [PermisoPerfilController::class, 'destroy'])->name('permiso.destroy');
 
     // Usuario CRUD
-    Route::get('/usuario',          [UsuarioController::class, 'list']);
-    Route::post('/usuario',         [UsuarioController::class, 'store']);
-    Route::get('/usuario/{id}',     [UsuarioController::class, 'show']);
-    Route::post('/usuario/{id}',    [UsuarioController::class, 'update']); // POST+_method por FormData
-    Route::delete('/usuario/{id}',  [UsuarioController::class, 'destroy']);
+    Route::get('/usuario',          [UsuarioController::class, 'list'])   ->name('usuario.list');
+    Route::post('/usuario',         [UsuarioController::class, 'store'])  ->name('usuario.store');
+    Route::get('/usuario/{id}',     [UsuarioController::class, 'show'])   ->name('usuario.show');
+    Route::post('/usuario/{id}',    [UsuarioController::class, 'update']) ->name('usuario.update');
+    Route::delete('/usuario/{id}',  [UsuarioController::class, 'destroy'])->name('usuario.destroy');
 });
 
 // ── Error 404 personalizado ───────────────────────────────────────────
