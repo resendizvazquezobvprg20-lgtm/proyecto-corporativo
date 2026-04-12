@@ -12,11 +12,11 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    public function boot(): void
-    {
-        // Forzar HTTPS cuando está en producción (Railway)
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
-        }
+  public function boot(): void
+{
+    if (config('app.env') === 'production') {
+        URL::forceScheme('https');
+        \Illuminate\Http\Request::setTrustedProxies(['*'], 0b11111);
     }
+}
 }

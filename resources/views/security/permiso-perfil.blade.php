@@ -7,25 +7,6 @@
 @section('page-title', 'Permisos por Perfil')
 
 @section('content')
-@php
-    use Tymon\JWTAuth\Facades\JWTAuth;
-    use App\Models\{PermisoPerfil, Usuario};
-
-    try {
-        $currentUser  = JWTAuth::parseToken()->authenticate();
-        $currentModel = Usuario::with('perfil')->find($currentUser->id);
-        $esAdmin      = $currentModel?->perfil?->bitAdministrador ?? false;
-    } catch (\Exception $e) {
-        $currentModel = null;
-        $esAdmin      = false;
-    }
-
-    $permisos = $esAdmin
-        ? ['bitAgregar'=>true,'bitEditar'=>true,'bitEliminar'=>true,'bitConsulta'=>true,'bitDetalle'=>true]
-        : ($currentModel
-            ? (PermisoPerfil::where('idPerfil', $currentModel->idPerfil)->where('idModulo', 3)->first()?->toArray() ?? [])
-            : []);
-@endphp
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -58,22 +39,18 @@
                             <th class="text-center">Consulta</th>
                             <th class="text-center">Eliminar</th>
                             <th class="text-center">Detalle</th>
-                            @if(!empty($permisos['bitEliminar']))
-                            <th class="text-center">Eliminar Registro</th>
-                            @endif
+                            <th class="text-center" id="thEliminar" style="display:none">Eliminar Registro</th>
                         </tr>
                     </thead>
                     <tbody id="permisosBody"></tbody>
                 </table>
             </div>
 
-            @if(!empty($permisos['bitAgregar']) || !empty($permisos['bitEditar']))
-            <div class="text-end mt-3">
+            <div class="text-end mt-3" id="divGuardar" style="display:none">
                 <button class="btn btn-primary" onclick="savePermisos()">
                     <i class="bi bi-floppy me-2"></i>Guardar Permisos
                 </button>
             </div>
-            @endif
         </div>
 
         <div id="noSeleccion" class="text-center text-muted py-5">
@@ -88,9 +65,32 @@
 <script>
 const allModulos = @json($modulos);
 const State = {
-    permisos: @json($permisos),
+    permisos: {bitAgregar:false,bitEditar:false,bitEliminar:false,bitConsulta:false,bitDetalle:false},
     permisosActuales: {},
 };
+
+(async () => {
+    try {
+        const res = await apiFetch('/api/menu');
+        if (!res || !res.ok) return;
+        const menus = await res.json();
+        for (const menu of menus) {
+            const sub = menu.submenus.find(s => s.id === 3);
+            if (sub) { State.permisos = sub; break; }
+        }
+    } catch(e) {}
+    // Mostrar/ocultar columna y botón según permisos
+    if (State.permisos.bitEliminar) {
+        const th = document.getElementById('thEliminar');
+        if (th) th.style.display = '';
+    }
+    if (State.permisos.bitAgregar || State.permisos.bitEditar) {
+        const d = document.getElementById('divGuardar');
+        if (d) d.style.display = '';
+    }
+})();
+
+
 
 async function loadPermisos() {
     const idPerfil = document.getElementById('selectPerfil').value;

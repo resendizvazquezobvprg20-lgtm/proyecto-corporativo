@@ -29,38 +29,16 @@
 @endpush
 
 @section('content')
-@php
-    use Tymon\JWTAuth\Facades\JWTAuth;
-    use App\Models\{PermisoPerfil, Usuario};
-
-    try {
-        $currentUser  = JWTAuth::parseToken()->authenticate();
-        $currentModel = Usuario::with('perfil')->find($currentUser->id);
-        $esAdmin      = $currentModel?->perfil?->bitAdministrador ?? false;
-    } catch (\Exception $e) {
-        $currentModel = null;
-        $esAdmin      = false;
-    }
-
-    $permisos = $esAdmin
-        ? ['bitAgregar'=>true,'bitEditar'=>true,'bitEliminar'=>true,'bitConsulta'=>true,'bitDetalle'=>true]
-        : ($currentModel
-            ? (PermisoPerfil::where('idPerfil', $currentModel->idPerfil)->where('idModulo', 4)->first()?->toArray() ?? [])
-            : []);
-@endphp
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-person-badge me-2"></i>Usuarios del Sistema</span>
-        @if(!empty($permisos['bitAgregar']))
-        <button class="btn btn-sm btn-light fw-semibold" onclick="UI.openModal('create')">
+        <button id="btnNuevoUsuario" class="btn btn-sm btn-light fw-semibold d-none" onclick="UI.openModal('create')">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Usuario
         </button>
-        @endif
     </div>
 
     <div class="card-body">
-        @if(!empty($permisos['bitConsulta']))
         <div class="row mb-3">
             <div class="col-md-4">
                 <div class="input-group">
@@ -72,7 +50,6 @@
                 </div>
             </div>
         </div>
-        @endif
 
         <div class="table-responsive">
             <table class="table table-hover table-bordered align-middle">
@@ -205,9 +182,24 @@
 const State = {
     currentPage: 1,
     editingId:   null,
-    permisos: @json($permisos),
+    permisos: {bitAgregar:false,bitEditar:false,bitEliminar:false,bitConsulta:false,bitDetalle:false},
     imgFile:     null,
 };
+
+(async () => {
+    try {
+        const res = await apiFetch('/api/menu');
+        if (!res || !res.ok) return;
+        const menus = await res.json();
+        for (const menu of menus) {
+            const sub = menu.submenus.find(s => s.id === 4);
+            if (sub) { State.permisos = sub; break; }
+        }
+    } catch(e) {}
+    if (State.permisos.bitAgregar) document.getElementById('btnNuevoUsuario')?.classList.remove('d-none');
+    Table.load(1);
+})();
+
 
 const Table = {
     async load(page = 1) {
@@ -446,8 +438,6 @@ const Notif = {
 function escHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let st; function debounceSearch(){clearTimeout(st);st=setTimeout(()=>Table.load(1),400);}
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (State.permisos.bitConsulta) Table.load(1);
-});
+// Init via async IIFE above
 </script>
 @endpush
