@@ -10,6 +10,18 @@ use App\Models\PermisoPerfil;
 
 class DashboardController extends Controller
 {
+    // Mapa de id de módulo → ruta URL
+    private static array $rutasModulo = [
+        1 => '/seguridad/perfil',
+        2 => '/seguridad/modulo',
+        3 => '/seguridad/permisos-perfil',
+        4 => '/seguridad/usuario',
+        5 => '/principal1/sub1',
+        6 => '/principal1/sub2',
+        7 => '/principal2/sub1',
+        8 => '/principal2/sub2',
+    ];
+
     /**
      * Construye el menú dinámico basado en los permisos del perfil del usuario.
      * Solo muestra menús/submenús donde el usuario tiene AL MENOS una acción activa.
@@ -23,11 +35,14 @@ class DashboardController extends Controller
             $submenus = [];
 
             foreach ($menu->modulos as $modulo) {
+                $ruta = self::$rutasModulo[$modulo->id] ?? '#';
+
                 if ($esAdmin) {
                     // Administrador ve todo
                     $submenus[] = [
                         'id'          => $modulo->id,
                         'nombre'      => $modulo->strNombreModulo,
+                        'ruta'        => $ruta,
                         'bitAgregar'  => true,
                         'bitEditar'   => true,
                         'bitConsulta' => true,
@@ -50,6 +65,7 @@ class DashboardController extends Controller
                         $submenus[] = [
                             'id'          => $modulo->id,
                             'nombre'      => $modulo->strNombreModulo,
+                            'ruta'        => $ruta,
                             'bitAgregar'  => $permiso->bitAgregar,
                             'bitEditar'   => $permiso->bitEditar,
                             'bitConsulta' => $permiso->bitConsulta,
@@ -75,15 +91,32 @@ class DashboardController extends Controller
     }
 
     /**
+     * API: devuelve el menú en JSON para el sidebar dinámico.
+     * Protegida por middleware jwt (requiere Bearer token).
+     */
+    public function menuJson()
+    {
+        try {
+            $jwtUser = JWTAuth::parseToken()->authenticate();
+            $usuario = Usuario::with('perfil')->find($jwtUser->id);
+            $esAdmin = $usuario?->perfil?->bitAdministrador ?? false;
+            $menus   = self::buildMenu($usuario->idPerfil, $esAdmin);
+            return response()->json($menus);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'No autenticado.'], 401);
+        }
+    }
+
+    /**
      * Muestra el dashboard principal
      */
     public function index()
     {
         try {
-            $jwtUser         = JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate();
-            $usuario         = Usuario::with('perfil')->find($jwtUser->id);
-            $esAdmin         = $usuario?->perfil?->bitAdministrador ?? false;
-            $menus           = self::buildMenu($usuario->idPerfil, $esAdmin);
+            $jwtUser = JWTAuth::parseToken()->authenticate();
+            $usuario = Usuario::with('perfil')->find($jwtUser->id);
+            $esAdmin = $usuario?->perfil?->bitAdministrador ?? false;
+            $menus   = self::buildMenu($usuario->idPerfil, $esAdmin);
         } catch (\Exception $e) {
             return redirect()->route('login')->with('error', 'Sesión inválida.');
         }

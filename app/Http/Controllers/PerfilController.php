@@ -13,7 +13,7 @@ class PerfilController extends Controller
     public function index()
     {
         try {
-            $cu      = JWTAuth::setToken(request()->bearerToken() ?? request()->cookie('jwt_token'))->authenticate();
+            $cu      = JWTAuth::parseToken()->authenticate();
             $um      = Usuario::with('perfil')->find($cu->id);
             $esAdmin = $um?->perfil?->bitAdministrador ?? false;
         } catch (\Exception $e) {
