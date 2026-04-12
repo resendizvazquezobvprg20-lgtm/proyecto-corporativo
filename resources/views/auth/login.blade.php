@@ -71,8 +71,23 @@
 <script>
     // Si ya tiene token válido, ir directo al dashboard
     if (localStorage.getItem('jwt_token')) {
-        window.location.href = '/dashboard';
-    }
+    // Verificar que el token sea válido antes de redirigir
+    fetch('/api/menu', {
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('jwt_token'),
+            'Accept': 'application/json'
+        }
+    }).then(res => {
+        if (res.ok) {
+            window.location.href = '/dashboard';
+        } else {
+            // Token inválido/expirado — limpiar y quedarse en login
+            localStorage.clear();
+        }
+    }).catch(() => {
+        localStorage.clear();
+    });
+}
 
     async function ejecutarLogin() {
         const usuario  = document.getElementById('strNombreUsuario').value.trim();
