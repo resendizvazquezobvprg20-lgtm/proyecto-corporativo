@@ -13,15 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
+  ->withMiddleware(function (Middleware $middleware) {
 
-        // Registrar los alias usados en web.php
-        $middleware->alias([
-            'jwt'        => \App\Http\Middleware\JwtMiddleware::class,
-            'permission' => \App\Http\Middleware\CheckPermission::class,
-        ]);
+    $middleware->trustProxies(at: '*');
 
-    })
+    $middleware->alias([
+        'jwt'        => \App\Http\Middleware\JwtMiddleware::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class,
+    ]);
+})
     ->withExceptions(function (Exceptions $exceptions) {
 
         // 403 → redirigir al login con mensaje de error
