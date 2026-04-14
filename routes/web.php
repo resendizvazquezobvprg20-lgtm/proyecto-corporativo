@@ -64,7 +64,9 @@ Route::middleware(['jwt'])->prefix('api')->group(function () {
 });
 
 // ── Servir archivos de storage directamente (sin depender del symlink) ──
-Route::get('/storage/{path}', function (string $path) {
+// Usamos /files/ en vez de /storage/ para evitar que el proxy de Railway
+// intercepte la petición antes de que llegue a Laravel.
+Route::get('/files/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
 
     if (!file_exists($fullPath)) {

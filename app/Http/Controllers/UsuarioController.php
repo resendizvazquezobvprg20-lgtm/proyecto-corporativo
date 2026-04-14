@@ -67,7 +67,7 @@ class UsuarioController extends Controller
 
         $usuarios = $query->orderBy('id', 'desc')->paginate(5);
         $usuarios->getCollection()->transform(function ($u) {
-            $u->imagen_url = $u->strImagen ? asset('storage/' . $u->strImagen) : null;
+            $u->imagen_url = $u->strImagen ? url('files/' . $u->strImagen) : null;
             return $u;
         });
 
@@ -112,7 +112,7 @@ class UsuarioController extends Controller
     public function show($id)
     {
         $usuario = Usuario::with(['perfil', 'estadoUsuario'])->findOrFail($id);
-        $usuario->imagen_url = $usuario->strImagen ? asset('storage/' . $usuario->strImagen) : null;
+        $usuario->imagen_url = $usuario->strImagen ? url('files/' . $usuario->strImagen) : null;
         return response()->json($usuario);
     }
 
