@@ -10,17 +10,6 @@ use App\Models\PermisoPerfil;
 
 class DashboardController extends Controller
 {
-    private static array $rutasModulo = [
-        1 => '/seguridad/perfil',
-        2 => '/seguridad/modulo',
-        3 => '/seguridad/permisos-perfil',
-        4 => '/seguridad/usuario',
-        5 => '/principal1/sub1',
-        6 => '/principal1/sub2',
-        7 => '/principal2/sub1',
-        8 => '/principal2/sub2',
-    ];
-
     public static function buildMenu(int $idPerfil, bool $esAdmin): array
     {
         $menus  = Menu::with(['modulos'])->orderBy('intOrden')->get();
@@ -30,7 +19,8 @@ class DashboardController extends Controller
             $submenus = [];
 
             foreach ($menu->modulos as $modulo) {
-                $ruta = self::$rutasModulo[$modulo->id] ?? '#';
+                // ✅ La ruta viene del propio modelo, no de un array hardcodeado
+                $ruta = $modulo->strRuta ?: '#';
 
                 if ($esAdmin) {
                     $submenus[] = [
@@ -82,10 +72,6 @@ class DashboardController extends Controller
         return $result;
     }
 
-    /**
-     * API JSON — protegida por middleware jwt.
-     * El JS del sidebar llama esto con Bearer token en el header.
-     */
     public function menuJson()
     {
         try {
@@ -99,11 +85,6 @@ class DashboardController extends Controller
         }
     }
 
-    /**
-     * Vista del dashboard — NO valida JWT en servidor.
-     * La autenticación la maneja el JS del layout (localStorage + /api/menu).
-     * Si el token es inválido, el JS redirige al login automáticamente.
-     */
     public function index()
     {
         return view('dashboard', [

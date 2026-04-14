@@ -8,15 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('modulos', function (Blueprint $table) {
-            $table->id();
-            $table->string('strNombreModulo', 100);
-            $table->timestamps();
+        Schema::table('modulos', function (Blueprint $table) {
+            $table->string('strRuta', 150)->nullable()->after('strNombreModulo');
+            $table->unsignedBigInteger('idMenu')->nullable()->after('strRuta');
+            $table->foreign('idMenu')->references('id')->on('menus')->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('modulo');
+        Schema::table('modulos', function (Blueprint $table) {
+            $table->dropForeign(['idMenu']);
+            $table->dropColumn(['strRuta', 'idMenu']);
+        });
     }
 };
