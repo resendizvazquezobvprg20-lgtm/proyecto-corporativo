@@ -225,8 +225,8 @@ const Table = {
             <tr>
                 <td>${(data.from || 0) + i}</td>
                 <td class="text-center">
-                    ${u.strImagen
-                        ? `<img src="/storage/${u.strImagen}" class="avatar-preview" style="width:40px;height:40px">`
+                    ${u.imagen_url
+                        ? `<img src="${u.imagen_url}" class="avatar-preview" style="width:40px;height:40px">`
                         : `<div class="avatar-default mx-auto" style="width:40px;height:40px;font-size:1rem">${u.strNombreUsuario[0].toUpperCase()}</div>`
                     }
                 </td>
@@ -290,8 +290,8 @@ const UI = {
         const res = await apiFetch(`{{ url('api/usuario') }}/${id}`);
         const u   = await res.json();
 
-        const foto = u.strImagen
-            ? `<img src="/storage/${u.strImagen}" class="avatar-preview" style="width:80px;height:80px">`
+        const foto = u.imagen_url
+            ? `<img src="${u.imagen_url}" class="avatar-preview" style="width:80px;height:80px">`
             : `<div class="avatar-default mx-auto" style="width:80px;height:80px;font-size:2rem">${u.strNombreUsuario[0].toUpperCase()}</div>`;
 
         content.innerHTML = `
@@ -318,10 +318,10 @@ const Actions = {
         document.getElementById('idPerfil').value           = u.idPerfil;
         document.getElementById('idEstadoUsuario').value    = u.idEstadoUsuario;
 
-        if (u.strImagen) {
+        if (u.imagen_url) {
             const prev = document.getElementById('avatarPreview');
             prev.className = 'avatar-preview mx-auto mb-2';
-            prev.outerHTML = `<img id="avatarPreview" src="/storage/${u.strImagen}" class="avatar-preview mx-auto mb-2" style="display:block">`;
+            prev.outerHTML = `<img id="avatarPreview" src="${u.imagen_url}" class="avatar-preview mx-auto mb-2" style="display:block">`;
         }
     },
 

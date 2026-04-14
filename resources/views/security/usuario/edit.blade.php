@@ -88,9 +88,9 @@ let imgFile = null;
     document.getElementById('idPerfil').value         = u.idPerfil;
     document.getElementById('idEstadoUsuario').value  = u.idEstadoUsuario;
 
-    if (u.strImagen) {
+    if (u.imagen_url) {
         document.getElementById('avatarPreview').outerHTML =
-            `<img id="avatarPreview" src="/storage/${u.strImagen}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #2979ff;display:block;margin:0 auto 8px">`;
+            `<img id="avatarPreview" src="${u.imagen_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #2979ff;display:block;margin:0 auto 8px">`;
     } else {
         document.getElementById('avatarPreview').textContent = u.strNombreUsuario.charAt(0).toUpperCase();
     }
