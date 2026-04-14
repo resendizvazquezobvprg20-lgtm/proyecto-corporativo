@@ -63,6 +63,18 @@ Route::middleware(['jwt'])->prefix('api')->group(function () {
     Route::delete('/usuario/{id}',  [UsuarioController::class, 'destroy'])->name('usuario.destroy');
 });
 
+// ── Servir archivos de storage directamente (sin depender del symlink) ──
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+
+    $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+    return response()->file($fullPath, ['Content-Type' => $mime]);
+})->where('path', '.*');
+
 // ── Error 404 personalizado ───────────────────────────────────────────
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
