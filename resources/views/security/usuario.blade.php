@@ -33,7 +33,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-person-badge me-2"></i>Usuarios del Sistema</span>
-        <button id="btnNuevoUsuario" class="btn btn-sm btn-light fw-semibold d-none" onclick="UI.openModal('create')">
+        <button id="btnNuevoUsuario" class="btn btn-sm btn-light fw-semibold d-none" onclick="window.location.href='/seguridad/usuario/create'">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Usuario
         </button>
     </div>
@@ -209,7 +209,7 @@ const Table = {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4">
             <div class="spinner-border spinner-border-sm text-primary me-2"></div>Cargando...</td></tr>`;
 
-        const res  = await apiFetch(`{{ route('usuario.list') }}?page=${page}&search=${encodeURIComponent(search)}`);
+        const res  = await apiFetch(`{{ url('api/usuario') }}?page=${page}&search=${encodeURIComponent(search)}`);
         const data = await res.json();
         Table.render(data);
     },
@@ -240,7 +240,7 @@ const Table = {
                 </td>
                 <td class="table-actions">
                     ${State.permisos.bitDetalle  ? `<button class="btn btn-info btn-sm me-1" onclick="UI.showDetail(${u.id})"><i class="bi bi-eye"></i></button>` : ''}
-                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="UI.openModal('edit',${u.id})"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="window.location.href=`/seguridad/usuario/${u.id}/edit`"><i class="bi bi-pencil"></i></button>` : ''}
                     ${State.permisos.bitEliminar ? `<button class="btn btn-danger btn-sm" onclick="Actions.delete(${u.id},'${escHtml(u.strNombreUsuario)}')"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>`).join('');
@@ -287,7 +287,7 @@ const UI = {
         content.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
         new bootstrap.Modal(document.getElementById('detalleModal')).show();
 
-        const res = await apiFetch(`{{ url('seguridad/usuario') }}/${id}`);
+        const res = await apiFetch(`{{ url('api/usuario') }}/${id}`);
         const u   = await res.json();
 
         const foto = u.strImagen
@@ -310,7 +310,7 @@ const UI = {
 
 const Actions = {
     async loadForEdit(id) {
-        const res = await apiFetch(`{{ url('seguridad/usuario') }}/${id}`);
+        const res = await apiFetch(`{{ url('api/usuario') }}/${id}`);
         const u   = await res.json();
         document.getElementById('strNombreUsuario').value   = u.strNombreUsuario;
         document.getElementById('strCorreo').value          = u.strCorreo;
@@ -327,7 +327,7 @@ const Actions = {
 
     async delete(id, nombre) {
         if (!confirm(`¿Eliminar el usuario "${nombre}"?`)) return;
-        const res  = await apiFetch(`{{ url('seguridad/usuario') }}/${id}`, { method: 'DELETE' });
+        const res  = await apiFetch(`{{ url('api/usuario') }}/${id}`, { method: 'DELETE' });
         const data = await res.json();
         Notif.show(data.message, data.success ? 'success' : 'danger');
         if (data.success) Table.load(State.currentPage);
@@ -380,7 +380,7 @@ const Form = {
         const id   = State.editingId;
         // Siempre POST — para edición usamos _method=PUT (Laravel method spoofing)
         // Esto es obligatorio con FormData/multipart ya que PHP no parsea PUT multipart
-        const url    = id ? `{{ url('seguridad/usuario') }}/${id}` : `{{ route('usuario.store') }}`;
+        const url    = id ? `{{ url('api/usuario') }}/${id}` : `{{ url('api/usuario') }}`;
         const method = 'POST';
 
         if (id) fd.append('_method', 'PUT');

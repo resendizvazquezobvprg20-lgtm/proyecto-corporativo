@@ -67,3 +67,13 @@ Route::middleware(['jwt'])->prefix('api')->group(function () {
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
+
+// ── Páginas separadas de Crear / Editar ──────────────────────────────
+Route::get('/seguridad/perfil/create',    [PerfilController::class,          'create'])->name('perfil.create');
+Route::get('/seguridad/perfil/{id}/edit', [PerfilController::class,          'edit'])  ->name('perfil.edit');
+Route::get('/seguridad/modulo/create',    [ModuloController::class,          'create'])->name('modulo.create');
+Route::get('/seguridad/modulo/{id}/edit', [ModuloController::class,          'edit'])  ->name('modulo.edit');
+Route::get('/seguridad/permiso/create',   [PermisoPerfilController::class,   'create'])->name('permiso.create');
+Route::get('/seguridad/permiso/{id}/edit',[PermisoPerfilController::class,   'edit'])  ->name('permiso.edit');
+Route::get('/seguridad/usuario/create',   [UsuarioController::class,         'create'])->name('usuario.create');
+Route::get('/seguridad/usuario/{id}/edit',[UsuarioController::class,         'edit'])  ->name('usuario.edit');

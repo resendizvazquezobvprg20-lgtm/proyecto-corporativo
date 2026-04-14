@@ -10,7 +10,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-puzzle me-2"></i>Módulos del Sistema</span>
-        <button id="btnNuevoModulo" class="btn d-none btn-sm btn-light fw-semibold" onclick="UI.openModal('create')">
+        <button id="btnNuevoModulo" class="btn d-none btn-sm btn-light fw-semibold" onclick="window.location.href='/seguridad/modulo/create'">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Módulo
         </button>
     </div>
@@ -117,7 +117,7 @@ const Table = {
         const s = document.getElementById('searchInput')?.value ?? '';
         document.getElementById('tableBody').innerHTML =
             `<tr><td colspan="3" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Cargando...</td></tr>`;
-        const res  = await apiFetch(`{{ route('modulo.list') }}?page=${page}&search=${encodeURIComponent(s)}`);
+        const res  = await apiFetch(`{{ url('api/modulo') }}?page=${page}&search=${encodeURIComponent(s)}`);
         const data = await res.json();
         Table.render(data);
     },
@@ -131,7 +131,7 @@ const Table = {
                 <td>${escHtml(m.strNombreModulo)}</td>
                 <td>
                     ${State.permisos.bitDetalle  ? `<button class="btn btn-info btn-sm me-1" onclick="UI.showDetail(${m.id})"><i class="bi bi-eye"></i></button>` : ''}
-                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="UI.openModal('edit',${m.id})"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="window.location.href=`/seguridad/modulo/${m.id}/edit`"><i class="bi bi-pencil"></i></button>` : ''}
                     ${State.permisos.bitEliminar ? `<button class="btn btn-danger btn-sm" onclick="Actions.delete(${m.id},'${escHtml(m.strNombreModulo)}')"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>`).join('');
@@ -158,7 +158,7 @@ const UI = {
         const c = document.getElementById('detalleContent');
         c.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary"></div></div>';
         new bootstrap.Modal(document.getElementById('detalleModal')).show();
-        const res = await apiFetch(`{{ url('seguridad/modulo') }}/${id}`);
+        const res = await apiFetch(`{{ url('api/modulo') }}/${id}`);
         const m   = await res.json();
         c.innerHTML = `<table class="table table-sm">
             <tr><th>ID</th><td>${m.id}</td></tr>
@@ -170,13 +170,13 @@ const UI = {
 
 const Actions = {
     async loadForEdit(id) {
-        const res = await apiFetch(`{{ url('seguridad/modulo') }}/${id}`);
+        const res = await apiFetch(`{{ url('api/modulo') }}/${id}`);
         const m   = await res.json();
         document.getElementById('strNombreModulo').value = m.strNombreModulo;
     },
     async delete(id, nombre) {
         if(!confirm(`¿Eliminar el módulo "${nombre}"?`)) return;
-        const res  = await apiFetch(`{{ url('seguridad/modulo') }}/${id}`, {method:'DELETE'});
+        const res  = await apiFetch(`{{ url('api/modulo') }}/${id}`, {method:'DELETE'});
         const data = await res.json();
         Notif.show(data.message, data.success?'success':'danger');
         if(data.success) Table.load(State.currentPage);
@@ -189,7 +189,7 @@ const Form = {
         if(!el.value.trim()){ el.classList.add('is-invalid'); return; }
         el.classList.remove('is-invalid');
         const id = State.editingId;
-        const url = id ? `{{ url('seguridad/modulo') }}/${id}` : `{{ route('modulo.store') }}`;
+        const url = id ? `{{ url('api/modulo') }}/${id}` : `{{ url('api/modulo') }}`;
         document.getElementById('btnSave').disabled = true;
         const res  = await apiFetch(url, {method: id?'PUT':'POST', body: JSON.stringify({strNombreModulo: el.value.trim()})});
         const data = await res.json();

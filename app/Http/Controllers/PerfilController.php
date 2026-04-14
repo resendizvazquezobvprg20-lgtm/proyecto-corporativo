@@ -4,14 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Perfil;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PerfilController extends Controller
 {
-    /**
-     * Vista — sin validación JWT en servidor.
-     * El JS verifica el token y carga los permisos vía /api/menu.
-     */
     public function index()
     {
         return view('security.perfil', [
@@ -19,6 +14,31 @@ class PerfilController extends Controller
                 ['label' => 'Inicio',    'url' => route('dashboard')],
                 ['label' => 'Seguridad', 'url' => '#'],
                 ['label' => 'Perfil',    'url' => null],
+            ]
+        ]);
+    }
+
+    public function create()
+    {
+        return view('security.perfil.create', [
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Perfil',    'url' => route('perfil.index')],
+                ['label' => 'Nuevo',     'url' => null],
+            ]
+        ]);
+    }
+
+    public function edit($id)
+    {
+        return view('security.perfil.edit', [
+            'id' => $id,
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Perfil',    'url' => route('perfil.index')],
+                ['label' => 'Editar',    'url' => null],
             ]
         ]);
     }

@@ -24,7 +24,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-people me-2"></i>Perfiles del Sistema</span>
-        <button class="btn btn-sm btn-light fw-semibold d-none" id="btnNuevoPerfil" onclick="UI.openModal('create')">
+        <button class="btn btn-sm btn-light fw-semibold d-none" id="btnNuevoPerfil" onclick="window.location.href='/seguridad/perfil/create'" >
             <i class="bi bi-plus-lg me-1"></i>Nuevo Perfil
         </button>
     </div>
@@ -163,7 +163,7 @@ const Table = {
         </td></tr>`;
 
         try {
-            const res  = await apiFetch(`{{ route('perfil.list') }}?page=${page}&search=${encodeURIComponent(search)}`);
+            const res  = await apiFetch(`{{ url('api/perfil') }}?page=${page}&search=${encodeURIComponent(search)}`);
             const data = await res.json();
             Table.render(data);
         } catch (err) {
@@ -192,7 +192,7 @@ const Table = {
                     </td>
                     <td class="table-actions">
                         ${State.permisos.bitDetalle  ? `<button class="btn btn-info btn-sm action-btn me-1" onclick="UI.showDetail(${p.id})"><i class="bi bi-eye"></i></button>` : ''}
-                        ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm action-btn me-1" onclick="UI.openModal('edit', ${p.id})"><i class="bi bi-pencil"></i></button>` : ''}
+                        ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm action-btn me-1" onclick="window.location.href='/seguridad/perfil/${p.id}/edit'"><i class="bi bi-pencil"></i></button>` : ''}
                         ${State.permisos.bitEliminar ? `<button class="btn btn-danger btn-sm action-btn" onclick="Actions.delete(${p.id}, '${escHtml(p.strNombrePerfil)}')"><i class="bi bi-trash"></i></button>` : ''}
                     </td>
                 </tr>
@@ -263,7 +263,7 @@ const UI = {
         modal.show();
 
         try {
-            const res = await apiFetch(`{{ url('seguridad/perfil') }}/${id}`);
+            const res = await apiFetch(`{{ url('api/perfil') }}/${id}`);
             const p   = await res.json();
             content.innerHTML = `
                 <table class="table table-sm">
@@ -283,7 +283,7 @@ const UI = {
 const Actions = {
     async loadForEdit(id) {
         try {
-            const res = await apiFetch(`{{ url('seguridad/perfil') }}/${id}`);
+            const res = await apiFetch(`{{ url('api/perfil') }}/${id}`);
             const p   = await res.json();
             document.getElementById('strNombrePerfil').value = p.strNombrePerfil;
             document.getElementById('bitAdministrador').checked = p.bitAdministrador;
@@ -296,7 +296,7 @@ const Actions = {
         if (!confirm(`¿Eliminar el perfil "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
 
         try {
-            const res  = await apiFetch(`{{ url('seguridad/perfil') }}/${id}`, { method: 'DELETE' });
+            const res  = await apiFetch(`{{ url('api/perfil') }}/${id}`, { method: 'DELETE' });
             const data = await res.json();
 
             if (data.success) {
@@ -336,7 +336,7 @@ const Form = {
             bitAdministrador: document.getElementById('bitAdministrador').checked,
         };
 
-        const url    = id ? `{{ url('seguridad/perfil') }}/${id}` : `{{ route('perfil.store') }}`;
+        const url    = id ? `{{ url('api/perfil') }}/${id}` : `{{ url('api/perfil') }}`;
         const method = id ? 'PUT' : 'POST';
 
         document.getElementById('btnSave').disabled = true;

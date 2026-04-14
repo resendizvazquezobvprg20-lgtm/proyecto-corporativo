@@ -18,18 +18,41 @@ class ModuloController extends Controller
             ]
         ]);
     }
- 
+
+    public function create()
+    {
+        return view('security.modulo.create', [
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Módulo',    'url' => route('modulo.index')],
+                ['label' => 'Nuevo',     'url' => null],
+            ]
+        ]);
+    }
+
+    public function edit($id)
+    {
+        return view('security.modulo.edit', [
+            'id' => $id,
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Módulo',    'url' => route('modulo.index')],
+                ['label' => 'Editar',    'url' => null],
+            ]
+        ]);
+    }
+
     public function list(Request $request)
     {
         $query = Modulo::query();
- 
         if ($request->filled('search')) {
             $query->where('strNombreModulo', 'like', '%' . $request->search . '%');
         }
- 
         return response()->json($query->orderBy('id', 'desc')->paginate(5));
     }
- 
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,17 +61,16 @@ class ModuloController extends Controller
             'strNombreModulo.required' => 'El nombre del módulo es obligatorio.',
             'strNombreModulo.unique'   => 'Ya existe un módulo con ese nombre.',
         ]);
- 
+
         $modulo = Modulo::create($validated);
- 
         return response()->json(['success' => true, 'message' => 'Módulo creado.', 'data' => $modulo], 201);
     }
- 
+
     public function show($id)
     {
         return response()->json(Modulo::findOrFail($id));
     }
- 
+
     public function update(Request $request, $id)
     {
         $modulo    = Modulo::findOrFail($id);
@@ -58,7 +80,7 @@ class ModuloController extends Controller
         $modulo->update($validated);
         return response()->json(['success' => true, 'message' => 'Módulo actualizado.', 'data' => $modulo]);
     }
- 
+
     public function destroy($id)
     {
         Modulo::findOrFail($id)->delete();

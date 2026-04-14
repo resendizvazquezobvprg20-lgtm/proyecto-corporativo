@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use App\Models\Perfil;
 use App\Models\EstadoUsuario;
-use App\Models\PermisoPerfil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsuarioController extends Controller
 {
@@ -22,6 +20,35 @@ class UsuarioController extends Controller
                 ['label' => 'Inicio',    'url' => route('dashboard')],
                 ['label' => 'Seguridad', 'url' => '#'],
                 ['label' => 'Usuario',   'url' => null],
+            ]
+        ]);
+    }
+
+    public function create()
+    {
+        return view('security.usuario.create', [
+            'perfiles' => Perfil::orderBy('strNombrePerfil')->get(),
+            'estados'  => EstadoUsuario::orderBy('id')->get(),
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Usuario',   'url' => route('usuario.index')],
+                ['label' => 'Nuevo',     'url' => null],
+            ]
+        ]);
+    }
+
+    public function edit($id)
+    {
+        return view('security.usuario.edit', [
+            'id'       => $id,
+            'perfiles' => Perfil::orderBy('strNombrePerfil')->get(),
+            'estados'  => EstadoUsuario::orderBy('id')->get(),
+            'breadcrumbs' => [
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Seguridad', 'url' => '#'],
+                ['label' => 'Usuario',   'url' => route('usuario.index')],
+                ['label' => 'Editar',    'url' => null],
             ]
         ]);
     }
@@ -39,8 +66,6 @@ class UsuarioController extends Controller
         }
 
         $usuarios = $query->orderBy('id', 'desc')->paginate(5);
-
-        // Adjuntar URL de imagen a cada usuario
         $usuarios->getCollection()->transform(function ($u) {
             $u->imagen_url = $u->strImagen ? asset('storage/' . $u->strImagen) : null;
             return $u;
@@ -68,21 +93,15 @@ class UsuarioController extends Controller
             'strCorreo.required'        => 'El correo es obligatorio.',
             'strCorreo.email'           => 'El correo no tiene un formato válido.',
             'strCorreo.unique'          => 'Ya existe un usuario con ese correo.',
-            'strImagen.image'           => 'El archivo debe ser una imagen.',
-            'strImagen.mimes'           => 'Solo se permiten imágenes JPEG, PNG o JPG.',
-            'strImagen.max'             => 'La imagen no debe superar 2MB.',
         ]);
 
-        // Hash de contraseña
         $validated['strPwd'] = Hash::make($request->strPwd);
 
-        // Subir imagen
         if ($request->hasFile('strImagen')) {
             $validated['strImagen'] = $request->file('strImagen')->store('usuarios', 'public');
         }
 
         $usuario = Usuario::create($validated);
-
         return response()->json([
             'success' => true,
             'message' => 'Usuario creado correctamente.',
@@ -118,14 +137,12 @@ class UsuarioController extends Controller
             'strCorreo.unique'          => 'Ya existe un usuario con ese correo.',
         ]);
 
-        // Actualizar contraseña solo si se envió
         if (!empty($request->strPwd)) {
             $validated['strPwd'] = Hash::make($request->strPwd);
         } else {
             unset($validated['strPwd']);
         }
 
-        // Nueva imagen: eliminar la anterior y guardar la nueva
         if ($request->hasFile('strImagen')) {
             if ($usuario->strImagen && Storage::disk('public')->exists($usuario->strImagen)) {
                 Storage::disk('public')->delete($usuario->strImagen);
@@ -134,7 +151,6 @@ class UsuarioController extends Controller
         }
 
         $usuario->update($validated);
-
         return response()->json([
             'success' => true,
             'message' => 'Usuario actualizado correctamente.',

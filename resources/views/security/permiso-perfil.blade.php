@@ -103,7 +103,7 @@ async function loadPermisos() {
     document.getElementById('noSeleccion').classList.add('d-none');
     document.getElementById('permisosContainer').classList.remove('d-none');
 
-    const res  = await apiFetch(`{{ route('permiso.list') }}?idPerfil=${idPerfil}`);
+    const res  = await apiFetch(`{{ url('api/permiso') }}?idPerfil=${idPerfil}`);
     const data = await res.json();
 
     // Indexar permisos actuales por idModulo
@@ -152,7 +152,7 @@ async function savePermisos() {
         const get = name => rows[idx].querySelector(`[data-perm="${name}"]`)?.checked ?? false;
 
         try {
-            const res  = await apiFetch(`{{ route('permiso.store') }}`, {
+            const res  = await apiFetch(`{{ url('api/permiso') }}`, {
                 method: 'POST',
                 body: JSON.stringify({
                     idPerfil,
@@ -182,7 +182,7 @@ async function savePermisos() {
 
 async function deletePermiso(id) {
     if (!confirm('¿Eliminar este registro de permiso?')) return;
-    const res  = await apiFetch(`{{ url('seguridad/permisos-perfil') }}/${id}`, { method: 'DELETE' });
+    const res  = await apiFetch(`{{ url('api/permiso') }}/${id}`, { method: 'DELETE' });
     const data = await res.json();
     Notif.show(data.message, data.success ? 'success' : 'danger');
     if (data.success) loadPermisos();
