@@ -240,7 +240,7 @@ const Table = {
                 </td>
                 <td class="table-actions">
                     ${State.permisos.bitDetalle  ? `<button class="btn btn-info btn-sm me-1" onclick="UI.showDetail(${u.id})"><i class="bi bi-eye"></i></button>` : ''}
-                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="window.location.href=`/seguridad/usuario/${u.id}/edit`"><i class="bi bi-pencil"></i></button>` : ''}
+                  ${State.permisos.bitEditar ? `<button class="btn btn-warning btn-sm me-1" onclick="window.location.href='/seguridad/usuario/${u.id}/edit'"><i class="bi bi-pencil"></i></button>` : ''}
                     ${State.permisos.bitEliminar ? `<button class="btn btn-danger btn-sm" onclick="Actions.delete(${u.id},'${escHtml(u.strNombreUsuario)}')"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>`).join('');
