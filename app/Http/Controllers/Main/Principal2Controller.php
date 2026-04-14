@@ -11,8 +11,8 @@ class Principal2Controller extends Controller
         return view('main.principal2-sub1', [
             'breadcrumbs' => [
                 ['label' => 'Inicio',      'url' => route('dashboard')],
-                ['label' => 'Principal 2', 'url' => '#'],
-                ['label' => 'Sub 1',       'url' => null],
+                ['label' => 'Operaciones', 'url' => '#'],
+                ['label' => 'Inventario',  'url' => null],
             ]
         ]);
     }
@@ -22,8 +22,8 @@ class Principal2Controller extends Controller
         return view('main.principal2-sub2', [
             'breadcrumbs' => [
                 ['label' => 'Inicio',      'url' => route('dashboard')],
-                ['label' => 'Principal 2', 'url' => '#'],
-                ['label' => 'Sub 2',       'url' => null],
+                ['label' => 'Operaciones', 'url' => '#'],
+                ['label' => 'Reportes',    'url' => null],
             ]
         ]);
     }

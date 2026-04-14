@@ -10,9 +10,9 @@ class Principal1Controller extends Controller
     {
         return view('main.principal1-sub1', [
             'breadcrumbs' => [
-                ['label' => 'Inicio',      'url' => route('dashboard')],
-                ['label' => 'Principal 1', 'url' => '#'],
-                ['label' => 'Sub 1',       'url' => null],
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Comercial', 'url' => '#'],
+                ['label' => 'Ventas',    'url' => null],
             ]
         ]);
     }
@@ -21,9 +21,9 @@ class Principal1Controller extends Controller
     {
         return view('main.principal1-sub2', [
             'breadcrumbs' => [
-                ['label' => 'Inicio',      'url' => route('dashboard')],
-                ['label' => 'Principal 1', 'url' => '#'],
-                ['label' => 'Sub 2',       'url' => null],
+                ['label' => 'Inicio',    'url' => route('dashboard')],
+                ['label' => 'Comercial', 'url' => '#'],
+                ['label' => 'Clientes',  'url' => null],
             ]
         ]);
     }

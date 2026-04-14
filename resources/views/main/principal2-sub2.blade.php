@@ -1,17 +1,20 @@
 {{-- resources/views/main/principal2-sub2.blade.php --}}
 @extends('layouts.app')
-@section('title','Principal 2.2')
-@section('page-title','Principal 2 — Submenú 2')
+@section('title', 'Reportes')
+@section('page-title', 'Principal 2 — Reportes')
 
 @section('content')
 <div class="card">
-    <div class="card-header"><i class="bi bi-layers me-2"></i>Principal 2 — Sub 2</div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-bar-chart-line me-2"></i>Reportes y Estadísticas</span>
+    </div>
     <div class="card-body">
         <div class="mb-3 d-flex gap-2 flex-wrap" id="accionesBtns">
-            {{-- Los botones se renderizan por JS según permisos --}}
+            {{-- Botones renderizados por JS según permisos --}}
         </div>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>Pantalla estática — Principal 2.2.
+        <div class="alert alert-secondary d-flex align-items-center gap-2 mb-0">
+            <i class="bi bi-info-circle-fill fs-5"></i>
+            <div>Módulo <strong>Reportes</strong> — pantalla estática de demostración. Los botones visibles corresponden a los permisos asignados a tu perfil.</div>
         </div>
     </div>
 </div>
@@ -21,7 +24,7 @@
 <script>
 (async () => {
     try {
-        const res   = await apiFetch('/api/menu');
+        const res = await apiFetch('/api/menu');
         if (!res || !res.ok) return;
         const menus = await res.json();
         let permisos = null;
@@ -36,7 +39,7 @@
         if (permisos.bitEliminar) btns.innerHTML += '<button class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>Eliminar</button>';
         if (permisos.bitConsulta) btns.innerHTML += '<button class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Consultar</button>';
         if (permisos.bitDetalle)  btns.innerHTML += '<button class="btn btn-info btn-sm"><i class="bi bi-eye me-1"></i>Detalle</button>';
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('Error cargando permisos:', e); }
 })();
 </script>
 @endpush

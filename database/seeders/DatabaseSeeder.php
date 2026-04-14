@@ -112,17 +112,17 @@ class DatabaseSeeder extends Seeder
             ['id' => 2, 'strNombreModulo' => 'Módulo',          'created_at' => now(), 'updated_at' => now()],
             ['id' => 3, 'strNombreModulo' => 'Permisos Perfil', 'created_at' => now(), 'updated_at' => now()],
             ['id' => 4, 'strNombreModulo' => 'Usuario',         'created_at' => now(), 'updated_at' => now()],
-            ['id' => 5, 'strNombreModulo' => 'Principal 1.1',   'created_at' => now(), 'updated_at' => now()],
-            ['id' => 6, 'strNombreModulo' => 'Principal 1.2',   'created_at' => now(), 'updated_at' => now()],
-            ['id' => 7, 'strNombreModulo' => 'Principal 2.1',   'created_at' => now(), 'updated_at' => now()],
-            ['id' => 8, 'strNombreModulo' => 'Principal 2.2',   'created_at' => now(), 'updated_at' => now()],
+            ['id' => 5, 'strNombreModulo' => 'Ventas',   'created_at' => now(), 'updated_at' => now()],
+            ['id' => 6, 'strNombreModulo' => 'Clientes',   'created_at' => now(), 'updated_at' => now()],
+            ['id' => 7, 'strNombreModulo' => 'Inventario',   'created_at' => now(), 'updated_at' => now()],
+            ['id' => 8, 'strNombreModulo' => 'Reportes',   'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // ── Menús ─────────────────────────────────────────
         DB::table('menus')->insert([
             ['id' => 1, 'strNombreMenu' => 'Seguridad',   'strIcono' => 'bi-shield-lock', 'intOrden' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'strNombreMenu' => 'Principal 1', 'strIcono' => 'bi-grid',        'intOrden' => 2, 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 3, 'strNombreMenu' => 'Principal 2', 'strIcono' => 'bi-layers',      'intOrden' => 3, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'strNombreMenu' => 'Comercial', 'strIcono' => 'bi-shop',        'intOrden' => 2, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'strNombreMenu' => 'Operaciones', 'strIcono' => 'bi-box-seam',      'intOrden' => 3, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // ── Relación Menú → Módulo ────────────────────────

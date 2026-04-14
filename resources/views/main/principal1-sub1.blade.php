@@ -1,17 +1,20 @@
 {{-- resources/views/main/principal1-sub1.blade.php --}}
 @extends('layouts.app')
-@section('title','Principal 1.1')
-@section('page-title','Principal 1 — Submenú 1')
+@section('title', 'Ventas')
+@section('page-title', 'Principal 1 — Ventas')
 
 @section('content')
 <div class="card">
-    <div class="card-header"><i class="bi bi-grid me-2"></i>Principal 1 — Sub 1</div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-cart3 me-2"></i>Gestión de Ventas</span>
+    </div>
     <div class="card-body">
         <div class="mb-3 d-flex gap-2 flex-wrap" id="accionesBtns">
-            {{-- Los botones se renderizan por JS según permisos --}}
+            {{-- Botones renderizados por JS según permisos --}}
         </div>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>Pantalla estática — Principal 1.1.
+        <div class="alert alert-secondary d-flex align-items-center gap-2 mb-0">
+            <i class="bi bi-info-circle-fill fs-5"></i>
+            <div>Módulo <strong>Ventas</strong> — pantalla estática de demostración. Los botones visibles corresponden a los permisos asignados a tu perfil.</div>
         </div>
     </div>
 </div>
@@ -21,7 +24,7 @@
 <script>
 (async () => {
     try {
-        const res   = await apiFetch('/api/menu');
+        const res = await apiFetch('/api/menu');
         if (!res || !res.ok) return;
         const menus = await res.json();
         let permisos = null;
@@ -36,7 +39,7 @@
         if (permisos.bitEliminar) btns.innerHTML += '<button class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>Eliminar</button>';
         if (permisos.bitConsulta) btns.innerHTML += '<button class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Consultar</button>';
         if (permisos.bitDetalle)  btns.innerHTML += '<button class="btn btn-info btn-sm"><i class="bi bi-eye me-1"></i>Detalle</button>';
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('Error cargando permisos:', e); }
 })();
 </script>
 @endpush
