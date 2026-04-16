@@ -53,6 +53,7 @@ class LoginController extends Controller
             'nombre'     => $usuario->strNombreUsuario,
             'perfil_id'  => $usuario->idPerfil,
             'imagen'     => $usuario->strImagen,
+            'imagen_url' => $usuario->strImagen ? url('files/' . $usuario->strImagen) : null,
         ]);
     }
 

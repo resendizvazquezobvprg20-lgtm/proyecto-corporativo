@@ -31,13 +31,23 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Nueva Contraseña <small class="text-muted">(dejar vacío para no cambiar)</small></label>
-                <input type="password" id="strPwd" class="form-control" placeholder="Mínimo 8 caracteres">
-                <div class="invalid-feedback">Mínimo 8 caracteres.</div>
+                <div class="input-group">
+                    <input type="password" id="strPwd" class="form-control" placeholder="Mínimo 8 caracteres">
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('strPwd',this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="strPwd-err" style="display:none">Mínimo 8 caracteres.</div>
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Confirmar Nueva Contraseña</label>
-                <input type="password" id="strPwdConf" class="form-control">
-                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                <div class="input-group">
+                    <input type="password" id="strPwdConf" class="form-control" placeholder="Repetir contraseña">
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('strPwdConf',this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="strPwdConf-err" style="display:none">Las contraseñas no coinciden.</div>
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Perfil <span class="text-danger">*</span></label>
@@ -76,6 +86,18 @@
 <script>
 const usuarioId = {{ $id }};
 let imgFile = null;
+
+function togglePwd(id, btn) {
+    const el = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (el.type === 'password') {
+        el.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        el.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
 
 // Precargar datos
 (async () => {
@@ -131,7 +153,6 @@ async function guardar() {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
 
     const fd = new FormData();
-    fd.append('_method', 'PUT');
     fd.append('strNombreUsuario', nombre.value.trim());
     fd.append('strCorreo', correo.value.trim());
     fd.append('idPerfil', perfil.value);
@@ -144,6 +165,11 @@ async function guardar() {
     const data = await res.json();
 
     if (data.success) {
+        // Si editó su propio usuario, actualizar imagen en localStorage
+        const myName = localStorage.getItem('user_name');
+        if (data.data && data.data.strNombreUsuario === myName && data.data.imagen_url) {
+            localStorage.setItem('user_img', data.data.imagen_url);
+        }
         window.location.href = '{{ route("usuario.index") }}';
     } else {
         const msgs = Object.values(data.errors || {}).flat();

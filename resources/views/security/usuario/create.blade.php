@@ -31,13 +31,23 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Contraseña <span class="text-danger">*</span></label>
-                <input type="password" id="strPwd" class="form-control" placeholder="Mínimo 8 caracteres">
-                <div class="invalid-feedback">Mínimo 8 caracteres.</div>
+                <div class="input-group">
+                    <input type="password" id="strPwd" class="form-control" placeholder="Mínimo 8 caracteres">
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('strPwd',this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="strPwd-err" style="display:none">Mínimo 8 caracteres.</div>
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Confirmar Contraseña <span class="text-danger">*</span></label>
-                <input type="password" id="strPwdConf" class="form-control" placeholder="Repetir contraseña">
-                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                <div class="input-group">
+                    <input type="password" id="strPwdConf" class="form-control" placeholder="Repetir contraseña">
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('strPwdConf',this)" tabindex="-1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="invalid-feedback" id="strPwdConf-err" style="display:none">Las contraseñas no coinciden.</div>
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Perfil <span class="text-danger">*</span></label>
@@ -76,6 +86,18 @@
 <script>
 let imgFile = null;
 
+function togglePwd(id, btn) {
+    const el = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (el.type === 'password') {
+        el.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        el.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
 function previewImg(input) {
     if (!input.files[0]) return;
     imgFile = input.files[0];
@@ -100,11 +122,14 @@ async function guardar() {
     errDiv.classList.add('d-none');
     [nombre, correo, pwd, pwdC, perfil].forEach(f => f.classList.remove('is-invalid'));
 
-    if (!nombre.value.trim()) { nombre.classList.add('is-invalid'); ok = false; }
-    if (!correo.value.includes('@')) { correo.classList.add('is-invalid'); ok = false; }
-    if (pwd.value.length < 8) { pwd.classList.add('is-invalid'); ok = false; }
-    if (pwd.value !== pwdC.value) { pwdC.classList.add('is-invalid'); ok = false; }
-    if (!perfil.value) { perfil.classList.add('is-invalid'); ok = false; }
+    if (!nombre.value.trim()) { nombre.classList.add('is-invalid'); ok = false; } else nombre.classList.remove('is-invalid');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo.value.trim())) { correo.classList.add('is-invalid'); ok = false; } else correo.classList.remove('is-invalid');
+    if (pwd.value.length < 8) { pwd.classList.add('is-invalid'); document.getElementById('strPwd-err').style.display='block'; ok = false; }
+    else { pwd.classList.remove('is-invalid'); document.getElementById('strPwd-err').style.display='none'; }
+    if (pwd.value !== pwdC.value) { pwdC.classList.add('is-invalid'); document.getElementById('strPwdConf-err').style.display='block'; ok = false; }
+    else { pwdC.classList.remove('is-invalid'); document.getElementById('strPwdConf-err').style.display='none'; }
+    if (!perfil.value) { perfil.classList.add('is-invalid'); ok = false; } else perfil.classList.remove('is-invalid');
     if (!ok) return;
 
     btn.disabled = true;

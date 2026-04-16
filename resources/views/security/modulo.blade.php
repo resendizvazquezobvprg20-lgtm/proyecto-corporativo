@@ -11,7 +11,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-puzzle me-2"></i>Módulos del Sistema</span>
         <button id="btnNuevoModulo" class="btn d-none btn-sm btn-light fw-semibold"
-                onclick="UI.openModal('create')">
+                onclick="window.location.href='/seguridad/modulo/create'">
             <i class="bi bi-plus-lg me-1"></i>Nuevo Módulo
         </button>
     </div>
@@ -148,7 +148,7 @@ const Table = {
                 <td>${escHtml(m.strNombreModulo)}</td>
                 <td>
                     ${State.permisos.bitDetalle  ? `<button class="btn btn-info btn-sm me-1" onclick="UI.showDetail(${m.id})"><i class="bi bi-eye"></i></button>` : ''}
-                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="UI.openModal('edit',${m.id})"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${State.permisos.bitEditar   ? `<button class="btn btn-warning btn-sm me-1" onclick="window.location.href='/seguridad/modulo/'+m.id+'/edit'"><i class="bi bi-pencil"></i></button>` : ''}
                     ${State.permisos.bitEliminar ? `<button class="btn btn-danger btn-sm" onclick="Actions.delete(${m.id},'${escHtml(m.strNombreModulo)}')"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>`).join('');

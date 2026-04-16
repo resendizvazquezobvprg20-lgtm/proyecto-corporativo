@@ -38,8 +38,18 @@ async function guardar() {
     const btn = document.getElementById('btnSave');
 
     errDiv.classList.add('d-none');
-    if (!nombre.value.trim()) { nombre.classList.add('is-invalid'); return; }
-    nombre.classList.remove('is-invalid');
+    let ok = true;
+    if (!nombre.value.trim()) {
+        nombre.classList.add('is-invalid');
+        ok = false;
+    } else if (nombre.value.trim().length < 3) {
+        nombre.classList.add('is-invalid');
+        nombre.nextElementSibling.textContent = 'El nombre debe tener al menos 3 caracteres.';
+        ok = false;
+    } else {
+        nombre.classList.remove('is-invalid');
+    }
+    if (!ok) return;
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';

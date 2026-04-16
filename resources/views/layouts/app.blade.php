@@ -117,6 +117,47 @@
             #content { margin-left: 0; }
         }
 
+        /* ── Mejoras de diseño ── */
+        .table thead th {
+            font-size: .78rem; text-transform: uppercase;
+            letter-spacing: .04em; color: #6b7280;
+            font-weight: 600; border-bottom: 2px solid #e5e7eb;
+        }
+        .table tbody td { font-size: .875rem; vertical-align: middle; }
+        .btn { border-radius: 8px; font-size: .85rem; }
+        .btn-sm { border-radius: 6px; font-size: .8rem; }
+        .form-control, .form-select {
+            border-radius: 8px; font-size: .875rem;
+            border-color: #d1d5db;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(41,121,255,.12);
+        }
+        .input-group .btn {
+            border-color: #d1d5db;
+        }
+        .card { border: none; border-radius: 14px; box-shadow: 0 2px 14px rgba(0,0,0,.07); }
+        .card-header {
+            background: #fff; border-bottom: 1px solid #f1f5f9;
+            border-radius: 14px 14px 0 0 !important;
+            padding: 16px 22px; font-weight: 600; color: var(--primary);
+            font-size: .9rem;
+        }
+        .pagination .page-link {
+            border-radius: 6px !important; margin: 0 2px;
+            border: 1px solid #e5e7eb; color: var(--primary);
+            font-size: .8rem; padding: 4px 10px;
+        }
+        .pagination .page-item.active .page-link {
+            background: var(--accent); border-color: var(--accent);
+        }
+        .badge { border-radius: 20px; }
+        .spinner-border-sm { width: 1rem; height: 1rem; }
+        /* Toast mejorado */
+        .toast { border-radius: 10px !important; font-size: .875rem; }
+
         @stack('styles')
     </style>
     @stack('styles')
@@ -193,15 +234,44 @@ const USER_NAME = localStorage.getItem('user_name') || 'Usuario';
 if (!TOKEN) {
     window.location.href = '/login';
 } else {
-    // Mostrar body solo si hay token
     document.body.style.display = 'block';
-
-    // Mostrar nombre de usuario
     document.getElementById('sidebarUserName').textContent = USER_NAME;
     document.getElementById('topbarUserName').textContent = USER_NAME;
     const initial = USER_NAME.charAt(0).toUpperCase();
-    document.getElementById('avatarInitial').textContent = initial;
-    document.getElementById('topbarInitial').textContent = initial;
+
+    // Intentar cargar imagen del usuario desde localStorage o API
+    const USER_IMG = localStorage.getItem('user_img') || '';
+    function setAvatars(imgUrl) {
+        ['avatarInitial','topbarInitial'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (imgUrl) {
+                el.outerHTML = `<img id="${id}" src="${imgUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)" onerror="this.outerHTML='<span id=\'${id}\' class=\'user-avatar-text\'>${initial}</span>'">`;
+            } else {
+                el.textContent = initial;
+            }
+        });
+        // Sidebar footer avatar
+        const sidebarAvatar = document.getElementById('avatarInitial');
+        if (sidebarAvatar && imgUrl) {
+            sidebarAvatar.outerHTML = `<img id="avatarInitial" src="${imgUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)" onerror="this.outerHTML='<span id=\'avatarInitial\' class=\'user-avatar-text\'>${initial}</span>'">`;
+        }
+    }
+    if (USER_IMG) {
+        setAvatars(USER_IMG);
+    } else {
+        document.getElementById('avatarInitial').textContent = initial;
+        document.getElementById('topbarInitial').textContent = initial;
+        // Fetch user image from API in background
+        fetch('/api/usuario/me', {
+            headers: { 'Authorization': 'Bearer ' + TOKEN, 'Accept': 'application/json' }
+        }).then(r => r.ok ? r.json() : null).then(data => {
+            if (data && data.imagen_url) {
+                localStorage.setItem('user_img', data.imagen_url);
+                setAvatars(data.imagen_url);
+            }
+        }).catch(() => {});
+    }
 }
 
 // ── Logout ────────────────────────────────────────────────────────────
