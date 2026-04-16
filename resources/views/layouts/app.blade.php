@@ -239,38 +239,39 @@ if (!TOKEN) {
     document.getElementById('topbarUserName').textContent = USER_NAME;
     const initial = USER_NAME.charAt(0).toUpperCase();
 
-    // Intentar cargar imagen del usuario desde localStorage o API
-    const USER_IMG = localStorage.getItem('user_img') || '';
+    // Cargar imagen de perfil desde localStorage (guardada al hacer login)
+    let USER_IMG = localStorage.getItem('user_img') || '';
+    // Corregir rutas antiguas que no tenían el prefijo /files/
+    if (USER_IMG && !USER_IMG.startsWith('http') && !USER_IMG.startsWith('/files/')) {
+        USER_IMG = '/files/' + USER_IMG;
+        localStorage.setItem('user_img', USER_IMG);
+    }
+
+    function avatarFallback(el, init) {
+        el.outerHTML = '<span class="user-avatar-text">' + init + '</span>';
+    }
     function setAvatars(imgUrl) {
-        ['avatarInitial','topbarInitial'].forEach(id => {
+        ['avatarInitial', 'topbarInitial'].forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
             if (imgUrl) {
-                el.outerHTML = `<img id="${id}" src="${imgUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)" onerror="this.outerHTML='<span id=\'${id}\' class=\'user-avatar-text\'>${initial}</span>'">`;
+                const img = document.createElement('img');
+                img.id = id;
+                img.src = imgUrl;
+                img.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)';
+                img.onerror = function() { this.outerHTML = '<span class="user-avatar-text">' + initial + '</span>'; };
+                el.replaceWith(img);
             } else {
                 el.textContent = initial;
             }
         });
-        // Sidebar footer avatar
-        const sidebarAvatar = document.getElementById('avatarInitial');
-        if (sidebarAvatar && imgUrl) {
-            sidebarAvatar.outerHTML = `<img id="avatarInitial" src="${imgUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)" onerror="this.outerHTML='<span id=\'avatarInitial\' class=\'user-avatar-text\'>${initial}</span>'">`;
-        }
     }
+
     if (USER_IMG) {
         setAvatars(USER_IMG);
     } else {
         document.getElementById('avatarInitial').textContent = initial;
         document.getElementById('topbarInitial').textContent = initial;
-        // Fetch user image from API in background
-        fetch('/api/usuario/me', {
-            headers: { 'Authorization': 'Bearer ' + TOKEN, 'Accept': 'application/json' }
-        }).then(r => r.ok ? r.json() : null).then(data => {
-            if (data && data.imagen_url) {
-                localStorage.setItem('user_img', data.imagen_url);
-                setAvatars(data.imagen_url);
-            }
-        }).catch(() => {});
     }
 }
 

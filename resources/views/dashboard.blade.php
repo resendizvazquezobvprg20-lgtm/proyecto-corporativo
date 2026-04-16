@@ -36,7 +36,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Datos básicos desde localStorage
     const userName = localStorage.getItem('user_name') || 'Usuario';
     document.getElementById('dashUserName').textContent = userName;
-    document.getElementById('dashAvatar').textContent = userName.charAt(0).toUpperCase();
+    let userImg = localStorage.getItem('user_img') || '';
+    // Corregir rutas antiguas sin prefijo /files/
+    if (userImg && !userImg.startsWith('http') && !userImg.startsWith('/files/')) {
+        userImg = '/files/' + userImg;
+        localStorage.setItem('user_img', userImg);
+    }
+    const initial = userName.charAt(0).toUpperCase();
+    const dashAv = document.getElementById('dashAvatar');
+    if (userImg) {
+        const img = document.createElement('img');
+        img.src = userImg;
+        img.style.cssText = 'width:60px;height:60px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.5)';
+        img.onerror = function() { dashAv.textContent = initial; dashAv.removeChild(img); };
+        dashAv.innerHTML = '';
+        dashAv.style.background = 'transparent';
+        dashAv.appendChild(img);
+    } else {
+        dashAv.textContent = initial;
+    }
 
     // Cargar menú desde API para construir las tarjetas
     try {
