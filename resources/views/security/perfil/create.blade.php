@@ -11,7 +11,8 @@
         <div class="mb-3">
             <label class="form-label fw-semibold">Nombre del Perfil <span class="text-danger">*</span></label>
             <input type="text" id="strNombrePerfil" class="form-control" maxlength="100" placeholder="Ej: Supervisor">
-            <div class="invalid-feedback">El nombre es obligatorio.</div>
+            <div class="form-text text-end"><span id="cntPerfil">0</span>/100 caracteres</div>
+            <div class="invalid-feedback" id="strNombrePerfil-err">El nombre es obligatorio.</div>
         </div>
         <div class="mb-3">
             <div class="form-check form-switch">
@@ -31,20 +32,29 @@
 
 @push('scripts')
 <script>
+// Contador de caracteres
+const inputPerfil = document.getElementById('strNombrePerfil');
+inputPerfil.addEventListener('input', () => {
+    document.getElementById('cntPerfil').textContent = inputPerfil.value.length;
+});
+
 async function guardar() {
     const nombre = document.getElementById('strNombrePerfil');
     const isAdmin = document.getElementById('bitAdministrador').checked;
     const errDiv = document.getElementById('formErrors');
+    const errMsg = document.getElementById('strNombrePerfil-err');
     const btn = document.getElementById('btnSave');
 
     errDiv.classList.add('d-none');
     let ok = true;
+
     if (!nombre.value.trim()) {
         nombre.classList.add('is-invalid');
+        errMsg.textContent = 'El nombre es obligatorio.';
         ok = false;
     } else if (nombre.value.trim().length < 3) {
         nombre.classList.add('is-invalid');
-        nombre.nextElementSibling.textContent = 'El nombre debe tener al menos 3 caracteres.';
+        errMsg.textContent = 'El nombre debe tener al menos 3 caracteres.';
         ok = false;
     } else {
         nombre.classList.remove('is-invalid');
